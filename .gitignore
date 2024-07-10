@@ -57,7 +57,7 @@ instance/
 
 # Virtual Environment
 /venv/
-.venv/
+backend/venv/
 env/
 .env/
 
