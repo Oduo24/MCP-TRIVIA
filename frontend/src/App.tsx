@@ -1,23 +1,61 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  RouteObject,
+} from "react-router-dom";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import AuthGuard from "./AuthGuard";
+import { adminRoutes, userRoutes, commonRoutes } from "./routes";
 
-import Home from "./components/Home";
-import SignUp from "./components/SignUp";
-import Login from "./components/Login";
-import Index from "./components/Index";
-import Trivia from "./components/Trivia";
+const renderRoutes = (routes: RouteObject[]) =>
+  routes.map(({ path, element }, index) => (
+    <Route key={index} path={path} element={element} />
+  ));
 
-function App() {
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AuthGuardWrapper />
+    </AuthProvider>
+  );
+};
+
+const AuthGuardWrapper: React.FC = () => {
+  const { isAuthenticated, role } = useAuth();
+
   return (
     <Router>
       <Routes>
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/" element={<Index />} />
-        <Route path="/trivia" element={<Trivia />} />
+        {/* Admin Routes */}
+        <Route
+          element={
+            <AuthGuard
+              isAuthenticated={isAuthenticated}
+              role={role}
+              requiredRole="admin"
+            />
+          }
+        >
+          {renderRoutes(adminRoutes)}
+        </Route>
+        {/* User Routes */}
+        <Route
+          element={
+            <AuthGuard
+              isAuthenticated={isAuthenticated}
+              role={role}
+              requiredRole="member"
+            />
+          }
+        >
+          {renderRoutes(userRoutes)}
+        </Route>
+        {/* Common Routes */}
+        {renderRoutes(commonRoutes)}
       </Routes>
     </Router>
   );
-}
+};
 
 export default App;

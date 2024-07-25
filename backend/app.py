@@ -41,18 +41,6 @@ def role_required(*roles):
         return decorator
     return wrapper
 
-# Dummy data for questions
-questions = [
-    {"id": 1, "question": "What is the capital of France?", "options": ["Paris", "London", "Berlin", "Madrid"], "answer": "Paris"},
-    {"id": 2, "question": "What is 2 + 2?", "options": ["3", "4", "5", "6"], "answer": "4"},
-    {"id": 3, "question": "Who painted the Mona Lisa?", "options": ["Leonardo da Vinci", "Pablo Picasso", "Vincent van Gogh", "Michelangelo"], "answer": "Leonardo da Vinci"},
-    {"id": 4, "question": "What is the largest planet in our solar system?", "options": ["Earth", "Jupiter", "Saturn", "Mars"], "answer": "Jupiter"},
-    {"id": 5, "question": "Which country is famous for kangaroos?", "options": ["Australia", "Brazil", "Canada", "India"], "answer": "Australia"},
-    {"id": 7, "question": "Which planet is known as the Red Planet?", "options": ["Earth", "Jupiter", "Mars", "Venus"], "answer": "Mars"},
-    {"id": 8, "question": "What is the tallest mountain in the world?", "options": ["Mount Everest", "K2", "Kangchenjunga", "Makalu"], "answer": "Mount Everest"},
-    {"id": 9, "question": "What is the chemical symbol for water?", "options": ["H2O", "CO2", "NaCl", "O2"], "answer": "H2O"}
-]
-
 # Instantiate a storage object and flush all classes that needs to be mapped to database tables
 storage = DBStorage()
 storage.reload()
@@ -69,7 +57,6 @@ def test():
 def register_user():
     """Register a new user."""
     if request.method == 'POST':
-        print(request.get_json())
         registration_data = request.get_json()
         username = registration_data.get('username')
         password = registration_data.get('password')
@@ -100,7 +87,7 @@ def register_user():
                 additional_claims={"role": role},
                 expires_delta=timedelta(hours=24)
             )
-            response = jsonify({"message": "User registered successfully"})
+            response = jsonify(user=new_user.username, role=new_user.role)
             response = make_response(response)
             response.set_cookie('access_token_cookie', access_token, httponly=True, samesite='None', secure=True)
             return response
@@ -118,7 +105,7 @@ def login():
     """Log in a user."""
     if request.method == 'POST':
         login_data = request.get_json()
-        username = login_data.get('username')
+        username = login_data.get('user')
         password = login_data.get('password')
 
         try:
@@ -133,7 +120,7 @@ def login():
                 additional_claims={"role": user.role},
                 expires_delta=timedelta(hours=24)
             )
-            response = jsonify(user=user.username)
+            response = jsonify(username=user.username, role=user.role, score=user.score)
             response = make_response(response)
             response.set_cookie('access_token_cookie', access_token, httponly=True, samesite='None', secure=True)
             return response
@@ -183,20 +170,133 @@ def refresh_expiring_jwts(response):
 @jwt_required()
 def get_questions():
     """retrieves trivia questions"""
-    return jsonify(questions)
+    try:
+        questions = storage.all_questions()
+        return jsonify(questions)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(error="Error retrieving questions")
+    finally:
+        storage.close()
 
 @app.route('/api/score', methods=['POST'])
 @jwt_required()
 def calculate_score():
     """calculates scores"""
-    data = request.json
-    print(data)
-    score = 0
-    for question in questions:
-        user_answer = data.get(str(question["id"]))
-        if user_answer == question["answer"]:
-            score += 1
-    return jsonify({"score": score})
+    try:
+        player_answers = request.json
+        username = get_jwt_identity()
+        score = storage.update_score(username, player_answers)
+
+        return jsonify({"score": score})
+    except Exception as e:
+        storage.rollback()
+        traceback.print_exc()
+        return jsonify(error="Error calculating score")
+    finally:
+        storage.close()
+
+@app.route('/api/leaderboard', methods=['GET'])
+@jwt_required()
+def get_leader_board():
+    """Get top five highest scores(username and score) and the position and score of the current user"""
+    try:
+        username = get_jwt_identity()
+        leader_board = storage.get_top_scores(username)
+        print(leader_board)
+        return jsonify(leader_board)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(error='Error getting score board')
+    finally:
+        storage.close()
+
+@app.route('/api/episodes', methods=['GET'])
+@jwt_required()
+def get_all_episodes():
+    """Retrieves all podcast episodes in the database"""
+    try:
+        episodes = storage.all_episodes()
+        return jsonify(episodes)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(error='Unable to retrieve episodes')
+    finally:
+        storage.close()
+
+@app.route('/api/categories', methods=['GET'])
+@jwt_required()
+def get_all_categories():
+    """Retrieves all question categories in the database"""
+    try:
+        categories = storage.all_categories()
+        return jsonify(categories)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(error='Unable to retrieve categories')
+    finally:
+        storage.close()
+
+@app.route('/api/new_episode', methods=['POST'])
+@jwt_required()
+def add_new_episode():
+    """Adds a new episode to the database"""
+    try:
+        data = request.get_json()
+        print(data)
+        new_episode = Episode(
+            title = data['episodeTitle'],
+            episode_no = data['episodeNumber'],
+            featured_guest = data['featuredGuest']
+        )
+        storage.new(new_episode)
+        return jsonify(status='Success')
+
+    except Exception as e:
+        traceback.print_exc()
+        storage.rollback()
+        return jsonify(error='Unable to add episode')
+    
+    finally:
+        storage.save()
+        storage.close()
+
+@app.route('/api/new_question', methods=['POST'])
+@jwt_required()
+def add_new_question():
+    """Adds a new question to the database"""
+    try:
+        data = request.get_json()
+        print(data)
+        new_question = Question(
+            question_text=data['question'],
+            episode_id=data['selectedEpisode'],
+            category_id=data['selectedCategory']
+        )
+        storage.new(new_question)
+        
+        # Create Answer objects and associate them with the new question
+        answer_objects = [
+            Answer(
+                answer_text=answer['choiceText'],
+                is_correct=answer['isCorrect'],
+                question_id=new_question.id
+            ) for answer in data['choices']
+        ]
+        for answer_object in answer_objects:
+            storage.new(answer_object)
+
+        return jsonify(status='Success')
+
+    except Exception as e:
+        traceback.print_exc()
+        storage.rollback()
+        return jsonify(error='Unable to add question')
+    
+    finally:
+        storage.save()
+        storage.close()
 
 if __name__ == '__main__':
     app.run(ssl_context=('localhost.pem', 'localhost-key.pem'), debug=True)
+

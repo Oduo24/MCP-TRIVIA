@@ -1,14 +1,22 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import useFetch from "../hooks/useFetch";
+import useFetch from "../../hooks/useFetch";
+import { User } from "../../models";
+import { useAuth } from "../../contexts/AuthContext";
 
 function Login() {
-  const [username, setUsername] = useState("");
+  const { setIsAuthenticated, setRole, setUsername, setScore } = useAuth();
+  const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { fetchData, loading } = useFetch();
 
-  const handleLoginSuccess = (user: object) => {
+  const handleLoginSuccess = (user: User) => {
+    setIsAuthenticated(true);
+    setRole(user.role);
+    setUsername(user.username);
+    setScore(user.score);
+    
     navigate("/home");
   };
 
@@ -22,17 +30,17 @@ function Login() {
 
     try {
       const loginData = {
-        username,
+        user,
         password,
       };
       const loginEndpoint = "https://localhost:5000/api/login";
 
-      const login = await fetchData({
+      const login_response = await fetchData({
         method: "POST",
         endpoint: loginEndpoint,
         body: loginData,
       });
-      handleLoginSuccess(login);
+      handleLoginSuccess(login_response);
     } catch (error) {
       handleLoginError(error as Error);
     }
@@ -48,8 +56,8 @@ function Login() {
             type="text"
             className="form-control"
             id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={user}
+            onChange={(e) => setUser(e.target.value)}
             required
           />
         </div>

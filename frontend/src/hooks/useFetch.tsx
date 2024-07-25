@@ -31,6 +31,11 @@ const useFetch = () => {
         credentials: "include", // Include credentials for cross-origin requests
       });
 
+      if (!response.ok) {
+        const errorText = await response.text(); // Get the full response text
+        throw new Error(`Error: ${response.status} ${response.statusText}\n${errorText}`);
+      }
+
       const data = await response.json();
 
       if (data.error) {
