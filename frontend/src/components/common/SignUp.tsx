@@ -24,7 +24,7 @@ const Signup: React.FC = () => {
       password,
     };
 
-    const signupEndpoint = "https://localhost:5000/api/register";
+    const signupEndpoint = "https://192.168.88.148:5000/api/register";
 
     try {
       const data = await fetchData({

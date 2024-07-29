@@ -1,23 +1,21 @@
-import React, { useEffect, useState } from 'react'
-import { Container, Row, Col, Table } from 'react-bootstrap';
-import useFetch from '../../hooks/useFetch';
-import { Score } from '../../models';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useEffect, useState } from 'react';
+import useFetch from '../../../hooks/useFetch';
+import { Score } from '../../../models';
+import { useAuth } from '../../../contexts/AuthContext';
+import "./leaderboard.css";
 
 const LeaderBoard: React.FC = () => {
     const {fetchData, loading} = useFetch();
     const [topScorers, setTopScorers] = useState<Score[]>([]);
-    // const [currentUserScore, setCurrentUserScore] = useState(0);
 
     const {username, score} = useAuth();
-
 
     const handleLoadLeaderBoardError = (error: Error) => {
         alert(error.message);
     } 
 
     const loadLeaderBoard = async() => {
-        const leaderBoardEndpoint = 'https://localhost:5000/api/leaderboard';
+        const leaderBoardEndpoint = 'https://192.168.88.148:5000/api/leaderboard';
 
         try {
             const data = await fetchData({
@@ -38,23 +36,15 @@ const LeaderBoard: React.FC = () => {
 
 
     return (
-        <Container>
-          <Row className="my-4">
-            <Col>
-              <h2>Leaderboard</h2>
-            </Col>
-          </Row>
-          <Row className="my-4">
-            <Col>
-              <h3>{username} --- {score}</h3>
-            </Col>
-          </Row>
-          <Row>
-            <Col>
-              <Table striped bordered hover>
+        <div className='container-fluid full-page-leaderboard-container'>
+          <div className="row justify-content-center text-center full-page-row">
+            <div className='col-md-8'>
+              <h2 className='text-white'>Leaderboard</h2>
+              <h3 className='text-white'>{username}: {score}</h3>
+              <table className='table table-striped styled-table'>
                 <thead>
                   <tr>
-                    <th>#</th>
+                    <th>No.</th>
                     <th>User</th>
                     <th>Score</th>
                   </tr>
@@ -68,10 +58,10 @@ const LeaderBoard: React.FC = () => {
                     </tr>
                   ))}
                 </tbody>
-              </Table>
-            </Col>
-          </Row>
-        </Container>
+              </table>
+            </div>
+          </div>
+        </div>
       );
 }
 

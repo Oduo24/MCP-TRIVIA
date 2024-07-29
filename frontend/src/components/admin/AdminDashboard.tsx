@@ -70,7 +70,7 @@ const AdminDashboard = () => {
   // fetch episodes
   const loadEpisodes = async () => {
     try {
-      const episodesEndpoint = "https://localhost:5000/api/episodes";
+      const episodesEndpoint = "https://192.168.88.148:5000/api/episodes";
       const data = await fetchEpisodes({
         method: "GET",
         endpoint: episodesEndpoint,
@@ -89,7 +89,7 @@ const AdminDashboard = () => {
   // Fetch categories
   const loadCategories = async () => {
     try {
-      const categoriesEndpoint = "https://localhost:5000/api/categories";
+      const categoriesEndpoint = "https://192.168.88.148:5000/api/categories";
       const data = await fetchCategories({
         method: "GET",
         endpoint: categoriesEndpoint,
@@ -108,7 +108,7 @@ const AdminDashboard = () => {
   const handleEpisodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Handle episode submission logic
-    const newEpisodeEndpoint = "https://localhost:5000/api/new_episode";
+    const newEpisodeEndpoint = "https://192.168.88.148:5000/api/new_episode";
     const episodeData =  {
       episodeTitle,
       episodeNumber,
@@ -136,7 +136,7 @@ const AdminDashboard = () => {
   const handleQuestionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Handle question submission logic
-    const newQuestionEndpoint = "https://localhost:5000/api/new_question";
+    const newQuestionEndpoint = "https://192.168.88.148:5000/api/new_question";
     const questionData = { 
       selectedEpisode,
       selectedCategory,

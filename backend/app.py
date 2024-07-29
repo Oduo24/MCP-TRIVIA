@@ -17,7 +17,7 @@ from jwt import PyJWTError
 
 app = Flask(__name__)
 jwt = JWTManager(app)
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": "https://localhost:5173"}})  # Enable CORS for all routes
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "https://192.168.88.148:5173"}})  # Enable CORS for all routes
 
 # app.secret_key = '1234567890op[kljhtresdfjkl.,mn]'
 app.config["JWT_SECRET_KEY"] = 'os.urandom(32)'
@@ -298,5 +298,5 @@ def add_new_question():
         storage.close()
 
 if __name__ == '__main__':
-    app.run(ssl_context=('localhost.pem', 'localhost-key.pem'), debug=True)
+    app.run(host='0.0.0.0', port=5000, ssl_context=('192.168.88.148.pem', '192.168.88.148-key.pem'), debug=True)
 

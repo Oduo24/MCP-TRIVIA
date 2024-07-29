@@ -1,0 +1,7 @@
+/* Ensure the body and html take up full height */
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}

@@ -144,8 +144,6 @@ class DBStorage:
             top_scorers.append(score_object)
         scores.append(top_scorers)
 
-        print(scores)
-
         if scores:
             return scores
         else:

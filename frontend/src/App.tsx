@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import AuthGuard from "./AuthGuard";
 import { adminRoutes, userRoutes, commonRoutes } from "./routes";
 
+
 const renderRoutes = (routes: RouteObject[]) =>
   routes.map(({ path, element }, index) => (
     <Route key={index} path={path} element={element} />
