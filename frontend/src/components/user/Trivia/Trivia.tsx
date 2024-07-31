@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, CSSProperties } from "react";
 import { Question, Answers } from "../../../models";
 import useFetch from "../../../hooks/useFetch";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import "./trivia.css";
+import { ClipLoader, DotLoader } from "react-spinners";
 
 const Trivia = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -72,6 +73,29 @@ const Trivia = () => {
       navigate('/scores');
     }
   };
+
+
+  if (loadingQuestions) {
+    return (
+      <div
+        style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100vh",
+        }}
+    >
+      <DotLoader
+        color="#fff240"
+        loading={loadingQuestions}
+        size={150}
+        aria-label="Loading Spinner"
+        data-testid="loader"
+      />
+    </div>
+    );
+  }
 
   return (
     <div className="container-fluid trivia-container">

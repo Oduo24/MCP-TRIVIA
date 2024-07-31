@@ -45,6 +45,9 @@ const useFetch = () => {
     } catch (error: any) {
       throw error; // Rethrow the error so it can be handled by the caller
     } finally {
+      setTimeout(() => {
+        console.log('This is delayed by 1 second');
+      }, 7000);
       setLoading(false);
     }
   };
