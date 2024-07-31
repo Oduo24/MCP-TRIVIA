@@ -19,7 +19,6 @@ const useFetch = () => {
     body,
   }: FetchOptions): Promise<any> => {
     setLoading(true);
-
     try {
       const response = await fetch(endpoint, {
         method,

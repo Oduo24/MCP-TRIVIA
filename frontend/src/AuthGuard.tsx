@@ -4,7 +4,7 @@ import { Navigate, Outlet } from "react-router-dom";
 interface AuthGuardProps {
   isAuthenticated: boolean;
   role: "admin" | "member";
-  requiredRole: "admin" | "member";
+  requiredRole: "admin" | "member" | null ;
 }
 
 const AuthGuard: React.FC<AuthGuardProps> = ({

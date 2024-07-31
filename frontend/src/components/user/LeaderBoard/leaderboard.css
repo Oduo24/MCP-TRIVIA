@@ -8,35 +8,61 @@
     /* Required for the overlay */
     overflow: hidden;
     /* Prevents overflow */
-    background: -webkit-linear-gradient(left, #e3e38b, #8e8ea4);
-    background: linear-gradient(to right, #8e8ea4, #e3e38b);
+    background-color: #020817;
 }
 
 
 /* Table styling */
-.styled-table {
+.scores-table {
     border-radius: 10px;
     /* Rounded corners */
     overflow: hidden;
     /* Ensure the rounded corners work */
-    box-shadow: 0 20px 20px rgba(0, 0, 0, 0.1);
-    /* Add a subtle drop shadow */
+    color: #B9B6B6;
+}
+
+.scores-table thead {
+    color: white;
+}
+
+.scores-table tr td:last-child {
+    color: white;
 }
 
 /* Ensure the top left and top right corners are rounded */
-.styled-table thead th:first-child {
+.scores-table thead th:first-child {
     border-top-left-radius: 10px;
 }
 
-.styled-table thead th:last-child {
+.scores-table thead th:last-child {
     border-top-right-radius: 10px;
 }
 
 /* Ensure the bottom left and bottom right corners are rounded */
-.styled-table tbody tr:last-child td:first-child {
+.scores-table tbody tr:last-child td:first-child {
     border-bottom-left-radius: 10px;
 }
 
-.styled-table tbody tr:last-child td:last-child {
+.scores-table tbody tr:last-child td:last-child {
     border-bottom-right-radius: 10px;
+}
+
+.row-container {
+    /* background-color: aliceblue; */
+    border-radius: 10px;
+    border: 1px solid #B9B6B6;
+}
+
+.username h3,
+.user-score h3 {
+    color: #B9B6B6;
+}
+
+.username h3 span,
+.user-score h3 span {
+    color: #ffffff;
+}
+
+.row-container h3 {
+    color: #B9B6B6;
 }

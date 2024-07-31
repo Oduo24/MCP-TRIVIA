@@ -6,8 +6,7 @@ const Home = () => {
   return (
     <>
       {/* Welcome Section */}
-      <Header />
-      <div className="container-fluid jumbotron text-center full-page-container text-white">
+      <div className="container-fluid text-center full-page-container text-white">
         <div className="row justify-content-center align-items-center full-page-row">
           <div className="col-md-6 welcome">
             <h1 className="display-6 fw-bold">The Mind Check Trivia!</h1>

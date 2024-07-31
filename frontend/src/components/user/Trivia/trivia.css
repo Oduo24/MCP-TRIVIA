@@ -1,8 +1,24 @@
 /* Full page container styling */
 .trivia-container {
-    background-color: #F5F5F5;
+    background-color: #020817;
 }
 
+
+
+
 .card {
-    box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2);
+    border: 1px solid #B9B6B6 !important;
+    background-color: #020817 !important;
+}
+
+.card .card-title {
+    color: white;
+}
+
+.card .card-text {
+    color: #B9B6B6;
+}
+
+.trivia-title {
+    color: #B9B6B6 !important;
 }

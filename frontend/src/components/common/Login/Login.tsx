@@ -20,7 +20,7 @@ function Login() {
     setUsername(user.username);
     setScore(user.score);
     
-    navigate("/home");
+    user.role === "admin" ? navigate("/admin/home") : navigate("/user/home");
   };
 
   const handleLoginError = (error: Error) => {

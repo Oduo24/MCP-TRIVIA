@@ -21,10 +21,7 @@ const AdminDashboard = () => {
   const [selectedEpisode, setSelectedEpisode] = useState("");
   const [question, setQuestion] = useState("");
   const [topScorers, setTopScorers] = useState<Score[]>([]);
-  const [totalUsers, setTotalUsers] = useState(0);
-  const [totalQuestions, setTotalQuestions] = useState(0);
-
-  const { fetchData: fetchAdminData, loading: loadingAdminData } = useFetch();
+  const {fetchData: fetchTopPlayers, loading: fetchingTopPlayers} = useFetch();
 
   // Initial state for choices
   const initialChoices: QuestionChoice[] = [
@@ -34,15 +31,23 @@ const AdminDashboard = () => {
     { choiceText: '', isCorrect: false },
   ];
   const [choices, setChoices] = useState<QuestionChoice[]>(initialChoices);
+  const { fetchData: fetchEpisodes, loading: loadingQuestions } = useFetch();
   const { fetchData: submitNewEpisode, loading: addingNewEpisode } = useFetch();
   const { fetchData: submitNewQuestion, loading: addingNewQuestion } =
     useFetch();
+  const { fetchData: fetchCategories, loading: loadingCategories } = useFetch();
   const [reloadEpisodes, setReloadEpisodes] = useState(false);
 
 
-  const handleLoadAdminDataError = (error: Error) => {
-    alert(error.message);
+  const handleLoadEpisodesError = (error: Error) => {
+    console.error(error.message);
+    // alert(error.message);
   };
+
+  const  handleLoadCategoriesError = (error: Error) => {
+    console.error(error.message);
+    // alert(error.message);
+  }
 
   const handleNewEpisodeCreationError = (error: Error) => {
     console.error(error);
@@ -63,29 +68,42 @@ const AdminDashboard = () => {
   }
 
   // fetch episodes
-  const loadAdminData = async () => {
+  const loadEpisodes = async () => {
     try {
-      const adminDataEndpoint = "https://192.168.88.148:5000/api/admin_data";
-      const data = await fetchAdminData({
+      const episodesEndpoint = "https://192.168.88.148:5000/api/episodes";
+      const data = await fetchEpisodes({
         method: "GET",
-        endpoint: adminDataEndpoint,
+        endpoint: episodesEndpoint,
       });
-      setEpisodes(data[0]);
-      setCategories(data[1]);
-      setTopScorers(data[2]);
-      setTotalUsers(data[3]);
-      setTotalQuestions(data[4]);
-
-
+      console.log('Fetched episodes:', data); // Check if it's an array
+      setEpisodes(data);
     } catch (error) {
-      handleLoadAdminDataError(error as Error);
+      handleLoadEpisodesError(error as Error);
     }
   };
 
   useEffect(() => {
-    loadAdminData();
+    loadEpisodes();
   }, [reloadEpisodes]); // Re-fetch episodes when reloadEpisodes changes
 
+  // Fetch categories
+  const loadCategories = async () => {
+    try {
+      const categoriesEndpoint = "https://192.168.88.148:5000/api/categories";
+      const data = await fetchCategories({
+        method: "GET",
+        endpoint: categoriesEndpoint,
+      });
+      console.log('Fetched categories:', data); // Check if it's an array
+      setCategories(data);
+    } catch (error) {
+      handleLoadCategoriesError(error as Error);
+    }
+  };
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
 
   const handleEpisodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,6 +170,30 @@ const AdminDashboard = () => {
   };
 
 
+  const handleLoadLeaderBoardError = (error: Error) => {
+    alert(error.message);
+  } 
+
+  // Fetch top scorers
+  const loadLeaderBoard = async() => {
+    const leaderBoardEndpoint = 'https://192.168.88.148:5000/api/leaderboard';
+
+    try {
+        const data = await fetchTopPlayers({
+            method: 'GET',
+            endpoint: leaderBoardEndpoint,
+        })
+        // set top scorers
+        setTopScorers(data[1]);
+    } catch (error) {
+        handleLoadLeaderBoardError(error as Error);
+    }
+}
+
+useEffect(() => {
+    loadLeaderBoard();
+}, [])
+
   return (
     //////////////////// START OF DASHBOARD  ///////////////////////
     <div className="container-fluid admin-dashboard-container">
@@ -197,17 +239,19 @@ const AdminDashboard = () => {
               <table className='scores-table w-100'>
                 <thead>
                   <tr>
-                    <th>Users</th>
-                    <th>Episodes</th>
-                    <th>Questions</th>
+                    <th>No.</th>
+                    <th>User</th>
+                    <th>Score</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>{totalUsers}</td>
-                    <td>{episodes.length}</td>
-                    <td>{totalQuestions}</td>
-                  </tr>
+                  {topScorers.map((scorer: Score, index: number) => (
+                    <tr key={index}>
+                      <td>{index + 1}</td>
+                      <td>{scorer.username}</td>
+                      <td>{scorer.score}</td>
+                    </tr>
+                  ))}
                 </tbody>
                 </table>
             </div>

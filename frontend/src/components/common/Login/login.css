@@ -1,12 +1,6 @@
 /* styles.css */
 
-/* Ensure the body and html take up full height */
-html,
-body {
-    height: 100vh;
-    margin: 0;
-    padding: 0;
-}
+
 
 /* Full page container styling */
 .full-page-container {
@@ -29,7 +23,7 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-image: url('./images/mcp_bg.jpeg');
+    background-image: url('');
     /* Your background image */
     background-size: cover;
     /* Ensure the image covers the container */

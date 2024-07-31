@@ -77,10 +77,10 @@ const Trivia = () => {
     <div className="container-fluid trivia-container">
       <div className="row justify-content-center">
         <div className="col-md-8 justify-content-center">
-          <h1 className="my-2">Trivia</h1>
+          <h1 className="my-2 text-white trivia-title">Trivia</h1>
           <div>
             {score !== null && (
-              <h4 className="">{username}: {score}</h4>
+              <h4 className="text-white">{username}: {score}</h4>
             )}
           </div>
           {questions

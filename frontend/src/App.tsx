@@ -7,6 +7,7 @@ import {
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import AuthGuard from "./AuthGuard";
 import { adminRoutes, userRoutes, commonRoutes } from "./routes";
+import Header from "./components/user/Header/Header";
 
 
 const renderRoutes = (routes: RouteObject[]) =>
@@ -27,6 +28,7 @@ const AuthGuardWrapper: React.FC = () => {
 
   return (
     <Router>
+      <Header isAuthenticated={isAuthenticated} role={role} />
       <Routes>
         {/* Admin Routes */}
         <Route
