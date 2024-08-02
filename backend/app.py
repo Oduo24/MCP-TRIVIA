@@ -7,6 +7,7 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import timedelta, datetime, timezone
+import time
 
 from models.base_model import BaseModel
 from models.main_models import *
@@ -165,7 +166,6 @@ def refresh_expiring_jwts(response):
         # Case where there is not a valid JWT. Just return the original response
         return response
 
-
 @app.route('/api/questions', methods=['GET'])
 @jwt_required()
 def get_questions():
@@ -276,15 +276,18 @@ def add_new_question():
         storage.new(new_question)
         
         # Create Answer objects and associate them with the new question
-        answer_objects = [
-            Answer(
-                answer_text=answer['choiceText'],
-                is_correct=answer['isCorrect'],
-                question_id=new_question.id
-            ) for answer in data['choices']
-        ]
-        for answer_object in answer_objects:
-            storage.new(answer_object)
+        answer_objects = []
+        for answer in data['choices']:
+            if answer['choiceText'] != '':
+                answer_object = Answer(
+                        answer_text=answer['choiceText'],
+                        is_correct=answer['isCorrect'],
+                        question_id=new_question.id
+                    )
+                answer_objects.append(answer_object)
+                
+        for choice in answer_objects:
+            storage.new(choice)
 
         return jsonify(status='Success')
 
@@ -296,6 +299,20 @@ def add_new_question():
     finally:
         storage.save()
         storage.close()
+
+@app.route('/api/admin_data', methods=['GET'])
+@jwt_required()
+def get_admin_data():
+    """Retrieves data neede in the admin dashboard"""
+    try:
+        admin_data = storage.all_admin_data()
+        return jsonify(admin_data)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(error='Unable to retrieve dashboard data')
+    finally:
+        storage.close()
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, ssl_context=('192.168.88.148.pem', '192.168.88.148-key.pem'), debug=True)

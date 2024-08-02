@@ -3,7 +3,7 @@
 
 import os
 
-from sqlalchemy import create_engine, select, desc, and_
+from sqlalchemy import create_engine, select, desc, and_, func
 from sqlalchemy.orm import sessionmaker, scoped_session, joinedload
 
 from models.base_model import Base
@@ -172,4 +172,52 @@ class DBStorage:
         } for category in categories]
 
         return categories_list
+    
+    def all_admin_data(self):
+        """Retrieves all data for admin panel"""
+        self.reload()
+
+        admin_data = []
+
+        # get episodes
+        episodes = self.__session.query(Episode).all()
+        episodes_list = [{
+            'id': episode.id,
+            'title': episode.title,
+            'episode_no': episode.episode_no,
+            'featured_guest': episode.featured_guest
+        } for episode in episodes]
+
+        # get categories
+        categories = self.__session.query(Category).all()
+        categories_list = [{
+            'id': category.id,
+            'category_name': category.category_name,
+        } for category in categories]
+
+        # get top scorers
+        top_five_scorers = self.__session.query(User).order_by(desc(User.score)).limit(5)
+
+        top_scorers = []
+        
+        for user in top_five_scorers:
+            score_object = {}
+            score_object["username"] = user.username
+            score_object["score"] = user.score
+            top_scorers.append(score_object)
+
+        user_count = self.__session.query(func.count(User.id)).scalar()
+        question_count = self.__session.query(func.count(Question.id)).scalar()
+
+        data = [episodes_list, categories_list, top_scorers, user_count, question_count]
+
+        for data_item in data:
+            admin_data.append(data_item)
+        
+        return admin_data
+
+
+
+        
+
         
