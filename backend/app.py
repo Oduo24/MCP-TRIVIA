@@ -123,7 +123,7 @@ def login():
             )
             response = jsonify(username=user.username, role=user.role, score=user.score)
             response = make_response(response)
-            response.set_cookie('access_token_cookie', access_token, httponly=True, samesite='None', secure=True)
+            response.set_cookie('access_token_cookie', access_token, httponly=False, samesite='None', secure=True)
             return response
 
         except (SQLAlchemyError, PyJWTError) as e:
@@ -144,27 +144,27 @@ def logout():
     unset_jwt_cookies(response)
     return response
 
-# Using an `after_request` callback, we refresh any token that is within 30 minutes of expiry
-@app.after_request
-def refresh_expiring_jwts(response):
-    """Refresh expiring JWT tokens."""
-    try:
-        exp_timestamp = get_jwt()["exp"]
-        now = datetime.now(timezone.utc)
-        target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
-        if target_timestamp > exp_timestamp:
-            username = get_jwt()["sub"]
-            role = get_jwt()["role"]
-            access_token = create_access_token(
-                identity=username,
-                additional_claims={"role": role},
-                expires_delta=timedelta(hours=24)
-            )
-            response.set_cookie('access_token', access_token, httponly=True, samesite='None', secure=True)
-        return response
-    except (RuntimeError, KeyError):
-        # Case where there is not a valid JWT. Just return the original response
-        return response
+# # Using an `after_request` callback, we refresh any token that is within 30 minutes of expiry
+# @app.after_request
+# def refresh_expiring_jwts(response):
+#     """Refresh expiring JWT tokens."""
+#     try:
+#         exp_timestamp = get_jwt()["exp"]
+#         now = datetime.now(timezone.utc)
+#         target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
+#         if target_timestamp > exp_timestamp:
+#             username = get_jwt()["sub"]
+#             role = get_jwt()["role"]
+#             access_token = create_access_token(
+#                 identity=username,
+#                 additional_claims={"role": role},
+#                 expires_delta=timedelta(hours=5000)
+#             )
+#             response.set_cookie('access_token', access_token, httponly=True, samesite='None', secure=True)
+#         return response
+#     except (RuntimeError, KeyError):
+#         # Case where there is not a valid JWT. Just return the original response
+#         return response
 
 @app.route('/api/questions', methods=['GET'])
 @jwt_required()
@@ -201,6 +201,7 @@ def calculate_score():
 def get_leader_board():
     """Get top five highest scores(username and score) and the position and score of the current user"""
     try:
+        time.sleep(5)
         username = get_jwt_identity()
         leader_board = storage.get_top_scores(username)
         print(leader_board)
