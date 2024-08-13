@@ -24,7 +24,7 @@ const AdminDashboard = () => {
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
 
-  const { fetchData: fetchAdminData, loading: loadingAdminData } = useFetch();
+  const { fetchData: fetchAdminData } = useFetch();
 
   // Initial state for choices
   const initialChoices: QuestionChoice[] = [
@@ -65,7 +65,7 @@ const AdminDashboard = () => {
   // fetch episodes
   const loadAdminData = async () => {
     try {
-      const adminDataEndpoint = "https://192.168.88.148:5000/api/admin_data";
+      const adminDataEndpoint = "/api/admin_data";
       const data = await fetchAdminData({
         method: "GET",
         endpoint: adminDataEndpoint,
@@ -90,7 +90,7 @@ const AdminDashboard = () => {
   const handleEpisodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Handle episode submission logic
-    const newEpisodeEndpoint = "https://192.168.88.148:5000/api/new_episode";
+    const newEpisodeEndpoint = "/api/new_episode";
     const episodeData =  {
       episodeTitle,
       episodeNumber,
@@ -118,7 +118,7 @@ const AdminDashboard = () => {
   const handleQuestionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Handle question submission logic
-    const newQuestionEndpoint = "https://192.168.88.148:5000/api/new_question";
+    const newQuestionEndpoint = "/api/new_question";
     const questionData = { 
       selectedEpisode,
       selectedCategory,
@@ -147,13 +147,13 @@ const AdminDashboard = () => {
   const handleChoiceChange = (index: number, value: string) => {
     const newChoices = [...choices];
     index === 0 ? newChoices[index].isCorrect = true : newChoices[index].isCorrect = false;
-    newChoices[index].choiceText = value;
+  
+    value ? newChoices[index].choiceText = value : newChoices[index].choiceText = '';
     setChoices(newChoices);
   };
 
 
   return (
-    //////////////////// START OF DASHBOARD  ///////////////////////
     <div className="container-fluid admin-dashboard-container">
       <div className="row justify-content-center">
         <div className="col-md-6 text-center">
@@ -242,6 +242,7 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
+        {/* End of dashboard */}
 
 
         {/* Add Episode Modal */}
@@ -353,7 +354,6 @@ const AdminDashboard = () => {
                   value={choice.choiceText}
                   onChange={(e) => handleChoiceChange(index, e.target.value)}
                   placeholder={`Enter choice ${index + 1}`}
-                  required
                 />
               </Form.Group>
             ))}
@@ -370,7 +370,6 @@ const AdminDashboard = () => {
 
       </div> 
     </div>
-    //////////////////// END OF DASHBOARD  ///////////////////////
 
   );
 };

@@ -1,10 +1,13 @@
-import { useState, useEffect, CSSProperties } from "react";
+import { useState, useEffect } from "react";
 import { Question, Answers } from "../../../models";
 import useFetch from "../../../hooks/useFetch";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import "./trivia.css";
-import { ClipLoader, DotLoader } from "react-spinners";
+import { DotLoader } from "react-spinners";
+import Lottie from "lottie-react";
+import celebrate from "../../../lottie/celebrate.json";
+import poor from "../../../lottie/poor.json";
+
 
 const Trivia = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -15,9 +18,12 @@ const Trivia = () => {
   const { fetchData: fetchQuestions, loading: loadingQuestions } = useFetch();
   const { fetchData: submitData, loading: loadingSubmit } = useFetch();
   const navigate = useNavigate();
+  const [isCelebrating, setIsCelebrating] = useState(false);
+  const [poorScore, setPoorScore] = useState(false);
 
-  const questionsEndpoint = "https://192.168.88.148:5000/api/questions";
-  const scoreEndpoint = "https://192.168.88.148:5000/api/score";
+
+  const questionsEndpoint = "/api/questions";
+  const scoreEndpoint = "/api/score";
 
   const handleLoadQuestionsError = (error: Error) => {
     alert(error.message);
@@ -57,23 +63,38 @@ const Trivia = () => {
         endpoint: scoreEndpoint,
         body: answers,
       });
+      // Check if the score is 3/3 and set the celebration animation
+      if (data.score - score === 3) {
+        setIsCelebrating(true);
+      }
+      // Check if the score is 0/3 and set poor score animation
+      else if(data.score - score === 0) {
+        setPoorScore(true);
+      } else {
+        handleCelebrationComplete();
+      }
+      // Update overall score
       setScore(data.score);
-      handleNext();
+      
     } catch (error) {
       handleSubmitError(error as Error);
     }
   };
 
-  const handleNext = () => {
+
+  const handleCelebrationComplete = () => {
+    // Stop celebration or poor score animation depending on which called the function
+    if (isCelebrating) setIsCelebrating(false);
+    if (poorScore) setPoorScore(false);
+
     if (startIndex + questionsPerPage < questions.length) {
       setStartIndex(startIndex + questionsPerPage);
       setAnswers({}); // Reset answers for the next set of questions
     } else {
-      alert("No more questions!");
       navigate('/scores');
+      alert("No more questions!");
     }
   };
-
 
   if (loadingQuestions) {
     return (
@@ -98,49 +119,82 @@ const Trivia = () => {
   }
 
   return (
-    <div className="container-fluid trivia-container">
-      <div className="row justify-content-center">
-        <div className="col-md-8 justify-content-center">
-          <h1 className="my-2 text-white trivia-title">Trivia</h1>
-          <div>
-            {score !== null && (
-              <h4 className="text-white">{username}: {score}</h4>
-            )}
+    <div className="row justify-content-center position-relative">
+      {isCelebrating && (
+        <div className="celebration-overlay">
+          <div className="col-md-4 text-center">
+            <Lottie 
+              loop={false} 
+              onComplete={handleCelebrationComplete} 
+              animationData={celebrate} 
+              style={{ width: 400, height: 400 }} 
+            />
           </div>
-          {questions
-            .slice(startIndex, startIndex + questionsPerPage)
-            .map((question) => (
-              <div className="card mb-3 justify-content-center" key={question.id}>
-                <div className="card-body">
-                  <p className="card-title">{question.question}</p>
-                  {question.options.map((option) => (
-                    <div key={option} className="form-check">
-                      <input
-                        type="radio"
-                        className="form-check-input"
-                        name={String(question.id)}
-                        value={option}
-                        onChange={() => handleChange(question.id, option)}
-                      />
-                      <label className="card-text form-check-label">{option}</label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
         </div>
-      </div>
-      <div className="justify-content-center text-center">
-        <button
-          className="btn btn-primary mb-3"
-          onClick={handleSubmit}
-          disabled={loadingSubmit}
-        >
-          {loadingSubmit ? "Calculating score..." : "Submit"}
-        </button>
-      </div>
+      )}
+  
+      {poorScore && (
+        <div className="poor-score-overlay">
+          <div className="col-md-4 text-center">
+            <Lottie 
+              loop={false} 
+              onComplete={handleCelebrationComplete} 
+              animationData={poor} 
+              style={{ width: 400, height: 400 }} 
+            />
+          </div>
+        </div>
+      )}
+  
+      <form onSubmit={handleSubmit}>
+        <div className="row justify-content-center">
+          <div className="col-md-8 justify-content-center">
+            <h1 className="my-2 text-white trivia-title">Trivia</h1>
+            <div>
+              {score !== null && (
+                <h4 className="text-white">{username}: {score}</h4>
+              )}
+            </div>
+            {questions
+              .slice(startIndex, startIndex + questionsPerPage)
+              .map((question) => (
+                <div className="card mb-3 justify-content-center" key={question.id}>
+                  <div className="card-body">
+                    <p className="card-title">{question.question}</p>
+                    {question.options.map((option) => (
+                      <div key={option} className="form-check">
+                        <input
+                          type="radio"
+                          className="form-check-input"
+                          name={String(question.id)}
+                          value={option}
+                          onChange={() => handleChange(question.id, option)}
+                          required
+                        />
+                        <label className="card-text form-check-label">{option}</label>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="card-footer">
+                    {question.episode_number} {question.episode_name}
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+        <div className="justify-content-center text-center">
+          <button
+            type="submit"
+            className="btn btn-primary mb-3"
+            disabled={loadingSubmit}
+          >
+            {loadingSubmit ? "Calculating score..." : "Submit"}
+          </button>
+        </div>
+      </form>
     </div>
   );
+  
 };
 
 export default Trivia;

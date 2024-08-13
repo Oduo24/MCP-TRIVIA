@@ -2,8 +2,10 @@
 export interface Question {
   id: number;
   question: string;
+  episode_name: string;
   options: string[];
   answer: string;
+  episode_number: number;
 }
 
 export interface Answers {

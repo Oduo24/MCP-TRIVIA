@@ -1,0 +1,99 @@
+/* Ensure the body and html take up full height */
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #020817;
+}
+
+
+/* Additional form styling (optional) */
+.form-control .login-input {
+    border-radius: 0.25rem;
+    box-shadow: none;
+    border-color: #ffffff !important;
+    background-color: transparent !important;
+    color: white !important;
+}
+
+/* Placeholder text styling */
+.form-control::placeholder {
+    color: rgb(150, 147, 147) !important;
+
+    /* Ensures the color is fully opaque */
+}
+
+.btn-primary {
+    background-color: yellow !important;
+    border-color: black !important;
+    color: black !important;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.welcome {
+    /* Minimum width */
+    background-color: rgba(255, 255, 255, 0.9);
+    /* Black background with 50% opacity */
+    color: black;
+    /* Text color for contrast */
+    padding: 10px;
+    /* Padding inside the div */
+    border-radius: 8px;
+    justify-content: center;
+    /* Optional: for centering content horizontally */
+    align-items: center;
+    /* Optional: for centering content vertically */
+    text-align: center;
+    /* Optional: for text alignment */
+
+}
+
+
+.card {
+    border: 1px solid #B9B6B6 !important;
+    background-color: #020817 !important;
+}
+
+.card .card-title {
+    color: white;
+}
+
+.card .card-text {
+    color: #B9B6B6;
+}
+
+.trivia-title,
+.account-title,
+.leaderboard-title {
+    color: #B9B6B6 !important;
+}
+
+.card .card-footer {
+    color: #B9B6B6 !important;
+    text-align: right !important;
+}
+
+.title-text {
+    color: #767474;
+}
+
+.celebration-overlay,
+.poor-score-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Transparent background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    /* Ensure it's on top of other content */
+}

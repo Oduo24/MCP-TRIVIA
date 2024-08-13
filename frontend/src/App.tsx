@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import AuthGuard from "./AuthGuard";
 import { adminRoutes, userRoutes, commonRoutes } from "./routes";
 import Header from "./components/user/Header/Header";
+import Footer from "./components/user/Footer/Footer";
 
 
 const renderRoutes = (routes: RouteObject[]) =>
@@ -24,20 +25,22 @@ const App: React.FC = () => {
 };
 
 const AuthGuardWrapper: React.FC = () => {
-  const { isAuthenticated, role } = useAuth();
+  const { username, isAuthenticated, role } = useAuth();
 
   return (
     <Router>
-      <Header isAuthenticated={isAuthenticated} role={role} />
       <Routes>
+        {/* Common Routes No authentication required */}
+        {renderRoutes(commonRoutes)}
         {/* Admin Routes */}
         <Route
           element={
             <AuthGuard
               isAuthenticated={isAuthenticated}
               role={role}
-              requiredRole="admin"
-            />
+              requiredRole="admin">
+                <Header isAuthenticated={isAuthenticated} role={role} username={username} />
+            </AuthGuard>
           }
         >
           {renderRoutes(adminRoutes)}
@@ -48,17 +51,17 @@ const AuthGuardWrapper: React.FC = () => {
             <AuthGuard
               isAuthenticated={isAuthenticated}
               role={role}
-              requiredRole="member"
-            />
+              requiredRole="member">
+                <Header isAuthenticated={isAuthenticated} role={role} username={username} />
+            </AuthGuard>
+
           }
         >
           {renderRoutes(userRoutes)}
         </Route>
-        {/* Common Routes */}
-        {renderRoutes(commonRoutes)}
       </Routes>
+      <Footer/>
     </Router>
   );
 };
-
 export default App;
