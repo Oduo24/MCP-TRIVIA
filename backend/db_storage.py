@@ -64,7 +64,7 @@ class DBStorage:
         self.__session.close()
 
     def get_user(self, username):
-        """Retrieves a single object of the specified class and column value
+        """Retrieves a single user object with the username
         """
         #retrieve the user with the username
         obj = self.__session.query(User).filter_by(username=username).first()
@@ -72,22 +72,30 @@ class DBStorage:
 
 
     def all_questions(self):
-        """Retrieves all questions
-        """
+        """Retrieves all questions with associated episode names"""
         self.reload()
-        #retrieve the user with the username
-        questions = self.__session.query(Question).options(joinedload(Question.answers)).all()
+
+        # Perform a join between Question and Episode and retrieve the data
+        questions = (
+            self.__session.query(Question)
+            .join(Episode, Question.episode_id == Episode.id)
+            .options(joinedload(Question.answers))
+            .add_columns(Episode.title, Episode.episode_no)
+            .all()
+        )
 
         formatted_questions = []
-        for question in questions:
+        for question, episode_name, episode_number in questions:
             options = [answer.answer_text for answer in question.answers]
             correct_answer = next((answer.answer_text for answer in question.answers if answer.is_correct), None)
-            
+
             formatted_questions.append({
                 "id": question.id,
                 "question": question.question_text,
                 "options": options,
-                "answer": correct_answer
+                "answer": correct_answer,
+                "episode_name": episode_name,
+                "episode_number": episode_number
             })
         return formatted_questions if formatted_questions else None
 
@@ -216,6 +224,19 @@ class DBStorage:
         
         return admin_data
 
+
+    def update_username(self, current_username, new_username):
+        """Updates username"""
+        self.reload()
+
+        # Check if username already exists if so return taken
+        if self.get_user(new_username):
+            return "taken"
+        # update the current username
+        user = self.get_user(current_username)
+        user.username = new_username
+        self.save()
+        return "Success"
 
 
         

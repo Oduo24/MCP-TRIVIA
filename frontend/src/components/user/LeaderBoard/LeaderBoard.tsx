@@ -4,6 +4,7 @@ import { Score } from '../../../models';
 import { useAuth } from '../../../contexts/AuthContext';
 import "./leaderboard.css";
 import { DotLoader } from 'react-spinners';
+import { errorToast } from '../../../utility';
 
 const LeaderBoard: React.FC = () => {
     const {fetchData, loading} = useFetch();
@@ -12,8 +13,8 @@ const LeaderBoard: React.FC = () => {
     const {username, score} = useAuth();
 
     const handleLoadLeaderBoardError = (error: Error) => {
-        alert(error.message);
-    } 
+        errorToast(error.message);
+    }
 
     const loadLeaderBoard = async() => {
         const leaderBoardEndpoint = '/api/leaderboard';
@@ -23,7 +24,6 @@ const LeaderBoard: React.FC = () => {
                 method: 'GET',
                 endpoint: leaderBoardEndpoint,
             })
-            // setCurrentUserScore(data[0]);
 
             setTopScorers(data[1]);
         } catch (error) {

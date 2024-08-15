@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { getCookie } from '../../utility';
+import { errorToast, getCookie } from '../../utility';
 import { useNavigate } from 'react-router-dom';
 import useFetch from '../../hooks/useFetch';
 import { useAuth } from '../../contexts/AuthContext';
@@ -42,7 +42,7 @@ const FirstVisit = () => {
   };
 
   const handleLoginError = (error: Error) => {
-    alert(error.message);
+    errorToast(error.message);
   };
 
   if (loading) {

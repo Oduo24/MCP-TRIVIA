@@ -1,13 +1,16 @@
 """Main applicaion module that defines routes"""
 import os
 import traceback
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response, redirect, url_for
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt, get_jwt_identity, verify_jwt_in_request, set_access_cookies, unset_jwt_cookies
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import timedelta, datetime, timezone
 import time
+import random
+import string
+import requests
 
 from models.base_model import BaseModel
 from models.main_models import *
@@ -48,13 +51,64 @@ storage.reload()
 storage.save()
 storage.close()
 
-@app.route('/', methods=['GET'], strict_slashes=False)
-def test():
-    """Test."""
-    return jsonify(test="Success")
+@app.route('/api/reg_temp_user', methods=['GET'], strict_slashes=False)
+def create_temp_user():
+    """Create temporary username and password"""
+    def generate_username(length=8):
+        """Generate a random username."""
+        username = 'user_' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
+        return username
 
+    def generate_password(length=12):
+        """Generate a random password."""
+        characters = string.ascii_letters + string.digits + string.punctuation
+        password = ''.join(random.choices(characters, k=length))
+        return password
+    
+    username = generate_username()
+    password = generate_password()
+    role = 'member'
 
-@app.route('/api/register', methods=['POST'], strict_slashes=False)
+    # Check if username already exists
+    if storage.get_user(username):
+        return jsonify({"error": "Username already exists"}), 400
+
+    password_hashed = generate_password_hash(password)
+
+    try:
+        storage.reload()
+        new_user = User(
+            username=username,
+            password=password_hashed,
+            role=role
+        )
+        storage.new(new_user)
+        storage.save()
+
+        access_token = create_access_token(
+            identity=username,
+            additional_claims={"role": role},
+            expires_delta=timedelta(days=365)
+        )
+        response = jsonify(username=new_user.username, role=new_user.role, score=new_user.score)
+        response = make_response(response)
+        response.set_cookie('access_token_cookie', access_token, httponly=False, samesite='None', secure=True)
+        
+        # Set visited cookie
+        expires_at = datetime.now(timezone.utc) + timedelta(days=365)
+        response.set_cookie('visited', 'true', httponly=False, samesite='None', secure=True, expires=expires_at)
+
+        return response
+
+    except (SQLAlchemyError, PyJWTError) as e:
+        storage.rollback()
+        traceback.print_exc()
+        return jsonify(error=str(e)), 500
+    finally:
+        storage.close()
+    
+
+@app.route('/api/register', methods=['POST', 'GET'], strict_slashes=False)
 def register_user():
     """Register a new user."""
     if request.method == 'POST':
@@ -86,11 +140,16 @@ def register_user():
             access_token = create_access_token(
                 identity=username,
                 additional_claims={"role": role},
-                expires_delta=timedelta(hours=24)
+                expires_delta=timedelta(days=365)
             )
             response = jsonify(user=new_user.username, role=new_user.role)
             response = make_response(response)
-            response.set_cookie('access_token_cookie', access_token, httponly=True, samesite='None', secure=True)
+            response.set_cookie('access_token_cookie', access_token, httponly=False, samesite='None', secure=True)
+            
+            # Set visited cookie
+            expires_at = datetime.now(timezone.utc) + timedelta(days=365)
+            response.set_cookie('visited', 'true', httponly=False, samesite='None', secure=True, expires=expires_at)
+
             return response
 
         except (SQLAlchemyError, PyJWTError) as e:
@@ -99,7 +158,8 @@ def register_user():
             return jsonify(error=str(e)), 500
         finally:
             storage.close()
-    return jsonify({"error": "Invalid method"}), 405
+    else:
+        return jsonify({"error": "Invalid method"}), 405
 
 @app.route('/api/login', methods=['POST'], strict_slashes=False)
 def login():
@@ -119,11 +179,12 @@ def login():
             access_token = create_access_token(
                 identity=user.username,
                 additional_claims={"role": user.role},
-                expires_delta=timedelta(hours=24)
+                expires_delta=timedelta(days=356)
             )
             response = jsonify(username=user.username, role=user.role, score=user.score)
             response = make_response(response)
             response.set_cookie('access_token_cookie', access_token, httponly=False, samesite='None', secure=True)
+            
             return response
 
         except (SQLAlchemyError, PyJWTError) as e:
@@ -201,7 +262,6 @@ def calculate_score():
 def get_leader_board():
     """Get top five highest scores(username and score) and the position and score of the current user"""
     try:
-        time.sleep(5)
         username = get_jwt_identity()
         leader_board = storage.get_top_scores(username)
         print(leader_board)
@@ -314,6 +374,31 @@ def get_admin_data():
     finally:
         storage.close()
 
+@app.route('/api/change_username', methods=['POST'])
+@jwt_required()
+def update_username():
+    """Updates username"""
+    try:
+        data = request.get_json()
+        username = get_jwt_identity()
+        change_status = storage.update_username(username, data["user"])
+        response = jsonify(status=change_status)
+
+        if change_status == 'Success':
+        #Ensure that you issue a new access token coz of the identity change due to change in username
+            access_token = create_access_token(
+                    identity=data["user"],
+                    additional_claims={"role": "member"},
+                    expires_delta=timedelta(days=365)
+                )
+            response.set_cookie('access_token_cookie', access_token, httponly=False, samesite='None', secure=True)
+        return response
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(error="Error updating username")
+    finally:
+        storage.close()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, ssl_context=('192.168.88.148.pem', '192.168.88.148-key.pem'), debug=True)

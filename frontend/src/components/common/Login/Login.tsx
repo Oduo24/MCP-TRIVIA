@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useFetch from "../../../hooks/useFetch";
 import { User } from "../../../models";
 import { useAuth } from "../../../contexts/AuthContext";
+import { errorToast } from "../../../utility";
 
 function Login() {
   const { setIsAuthenticated, setRole, setUsername, setScore } = useAuth();
@@ -21,7 +22,7 @@ function Login() {
   };
 
   const handleLoginError = (error: Error) => {
-    alert(error.message);
+    errorToast(error.message);
     navigate("/login");
   };
 

@@ -7,6 +7,8 @@ import { DotLoader } from "react-spinners";
 import Lottie from "lottie-react";
 import celebrate from "../../../lottie/celebrate.json";
 import poor from "../../../lottie/poor.json";
+import toast from "react-hot-toast";
+import { errorToast, successToast } from "../../../utility";
 
 
 const Trivia = () => {
@@ -26,11 +28,13 @@ const Trivia = () => {
   const scoreEndpoint = "/api/score";
 
   const handleLoadQuestionsError = (error: Error) => {
-    alert(error.message);
+    errorToast('Error getting scores');
+    console.log(error.message);
   };
 
   const handleSubmitError = (error: Error) => {
-    alert(error.message);
+    errorToast('Error getting scores');
+    console.log(error.message);
   };
 
   useEffect(() => {
@@ -55,6 +59,10 @@ const Trivia = () => {
     });
   };
 
+  const notify = (message: string, icon: string) => {
+    toast(message, {icon: icon});
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -66,11 +74,24 @@ const Trivia = () => {
       // Check if the score is 3/3 and set the celebration animation
       if (data.score - score === 3) {
         setIsCelebrating(true);
+        // Send a toast
+        const message = '3/3, you really are a chequemate';
+        const icon = '🥳';
+        notify(message, icon);
       }
       // Check if the score is 0/3 and set poor score animation
       else if(data.score - score === 0) {
         setPoorScore(true);
+        // Send a toast
+        const message = '0/3';
+        const icon = '😞';
+        notify(message, icon);
       } else {
+        // Send a toast
+        const userscore = data.score - score;
+        const message = `${userscore}`;
+        const icon = '😐';
+        notify(message, icon);
         handleCelebrationComplete();
       }
       // Update overall score
@@ -92,7 +113,7 @@ const Trivia = () => {
       setAnswers({}); // Reset answers for the next set of questions
     } else {
       navigate('/scores');
-      alert("No more questions!");
+      successToast('No more questions available');
     }
   };
 

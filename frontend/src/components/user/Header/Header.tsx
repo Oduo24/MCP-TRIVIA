@@ -5,6 +5,7 @@ import { MdDashboardCustomize, MdLeaderboard, MdOutlineLogin, MdSwitchAccount } 
 import { Link, Outlet } from 'react-router-dom'
 import { Tooltip, TooltipRefProps } from 'react-tooltip';
 import { useRef } from 'react';
+import { Toaster } from 'react-hot-toast';
 
 interface HeaderProps {
   isAuthenticated: boolean;
@@ -31,6 +32,7 @@ const Header: React.FC<HeaderProps> = ({isAuthenticated, role, username}) => {
     <IconContext.Provider value={{ color: "yellow", className: "global-class-name" }}>
     <div className="row flex-fill justify-content-center text-center">
       <div className="col-md-8 mt-5">
+        <Toaster/>
         <nav className="d-flex justify-content-center">
           <ul className="nav">
             {isAuthenticated && role === 'admin' && (
@@ -51,7 +53,7 @@ const Header: React.FC<HeaderProps> = ({isAuthenticated, role, username}) => {
                 </li>
                 <li className="nav-item">
                   <Link className="nav-link text-white" to="/scores">
-                    <MdLeaderboard /> Leaderboard
+                    <MdLeaderboard /> Scores
                   </Link>
                 </li>
                 <li className="nav-item">

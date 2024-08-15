@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import useFetch from '../../../hooks/useFetch';
 import { Success } from '../../../models';
+import toast from 'react-hot-toast';
 
 const Account = () => {
     const { username, setUsername } = useAuth();
@@ -31,15 +32,18 @@ const Account = () => {
     const handleUsernameChangeSuccess = () => {
         setUsername(user);
         setUser("");
-        alert('Username changed successfully');
+        const notify = () => toast.success('Username changed suucessfuly!');
+        notify();
     }
 
     const handleUsernameAlreadyTaken = () => {
-        alert('Username already taken');
+        const notify = () => toast.error('Sorry, username already taken!');
+        notify();
     }
 
     const handleusernameChangeError = (error: Error) => {
-        alert(error.message);
+        const notify = () => toast.error(`${error}`);
+        notify();
     }
 
 

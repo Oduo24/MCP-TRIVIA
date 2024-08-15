@@ -7,6 +7,7 @@ import {
   Modal,
   Form,
 } from "react-bootstrap";
+import { errorToast, successToast } from "../../utility";
 
 
 const AdminDashboard = () => {
@@ -41,25 +42,26 @@ const AdminDashboard = () => {
 
 
   const handleLoadAdminDataError = (error: Error) => {
-    alert(error.message);
+    console.error(error);
+    errorToast('Could not load admin data');
   };
 
   const handleNewEpisodeCreationError = (error: Error) => {
     console.error(error);
-    alert(error.message);
+    errorToast('Error adding ne episode');
   }
 
   const handleNewEpisodeCreationSuccess = (data: Success) => {
-    alert(data.status);
+    successToast(data.status);
   }
 
   const handleNewQuestionCreationSuccess = (data: Success) => {
-    alert(data.status);
+    successToast(data.status);
   }
 
   const handleNewQuestionCreationError = (error: Error) => {
     console.error(error);
-    alert(error.message);
+    errorToast(error.message);
   }
 
   // fetch episodes

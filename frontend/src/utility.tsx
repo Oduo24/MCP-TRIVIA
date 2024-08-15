@@ -1,4 +1,5 @@
 import { jwtDecode } from "jwt-decode";
+import toast from "react-hot-toast";
 
 interface TokenPayload {
     exp: number;
@@ -19,6 +20,16 @@ export const getCookie = (name: string): string | null => {
     const parts = value.split(`; ${name}=`);
     if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
     return null;
+}
+
+// Utility function to send an error message toast
+export const errorToast = (message: string) => {
+    toast.error(message);
+}
+
+// Utility function to send a success message toast
+export const successToast = (message: string) => {
+    toast.success(message);
 }
 
 

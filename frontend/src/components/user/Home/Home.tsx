@@ -10,7 +10,7 @@ const Home = () => {
   return (
     <>
     {!isAuthenticated && <Header isAuthenticated={isAuthenticated} role={role} username={username} />}
-    <div className="row flex-fill justify-content-center text-center mx-5">
+    <div className="row d-flex align-items-center flex-fill justify-content-center text-center mx-5">
       <div className="col-md-8 welcome text-center">
         <h1 className="display-6 fw-bold">The Mind Check Trivia!</h1>
         <p className="lead">

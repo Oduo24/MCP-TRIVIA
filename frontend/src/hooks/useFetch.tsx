@@ -16,7 +16,7 @@ const useFetch = () => {
   const navigate = useNavigate();
 
   const fetchData = async ({method, endpoint, headers, body,}: FetchOptions): Promise<any> => {
-    if (endpoint === 'https://192.168.88.148:5000/api/login' || 'https://192.168.88.148:5000/api/reg_temp_user') {
+    if (endpoint === '/api/login' || '/api/reg_temp_user') {
       setLoading(true);
       try {
         const response = await fetch(endpoint, {
