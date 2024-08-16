@@ -24,8 +24,9 @@ const AdminDashboard = () => {
   const [topScorers, setTopScorers] = useState<Score[]>([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
-
   const { fetchData: fetchAdminData } = useFetch();
+  const [episodeImage, setEpisodeImage] = useState<File | null>(null);
+
 
   // Initial state for choices
   const initialChoices: QuestionChoice[] = [
@@ -35,20 +36,18 @@ const AdminDashboard = () => {
     { choiceText: '', isCorrect: false },
   ];
   const [choices, setChoices] = useState<QuestionChoice[]>(initialChoices);
-  const { fetchData: submitNewEpisode, loading: addingNewEpisode } = useFetch();
+  // const { fetchData: submitNewEpisode, loading: addingNewEpisode } = useFetch();
   const { fetchData: submitNewQuestion, loading: addingNewQuestion } =
     useFetch();
   const [reloadEpisodes, setReloadEpisodes] = useState(false);
 
-
   const handleLoadAdminDataError = (error: Error) => {
-    console.error(error);
-    errorToast('Could not load admin data');
+    errorToast(error.message);
   };
 
   const handleNewEpisodeCreationError = (error: Error) => {
     console.error(error);
-    errorToast('Error adding ne episode');
+    errorToast(error.message);
   }
 
   const handleNewEpisodeCreationSuccess = (data: Success) => {
@@ -91,31 +90,46 @@ const AdminDashboard = () => {
 
   const handleEpisodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle episode submission logic
+
     const newEpisodeEndpoint = "/api/new_episode";
-    const episodeData =  {
-      episodeTitle,
-      episodeNumber,
-      featuredGuest,
-    };
+
+    // Create a FormData object
+    const formData = new FormData();
+    formData.append('episodeTitle', episodeTitle);
+    formData.append('episodeNumber', episodeNumber);
+    formData.append('featuredGuest', featuredGuest || '');
+    if (episodeImage) {
+      formData.append('episodeImage', episodeImage);
+    }
+
 
     try {
-      const data = await submitNewEpisode({
+      // Send the form data with the POST request
+      const response = await fetch(newEpisodeEndpoint, {
         method: "POST",
-        endpoint: newEpisodeEndpoint,
-        body: episodeData,
+        body: formData, // Use the FormData object
+        credentials: "include", // Include credentials for cross-origin requests
       });
+
+      if (!response.ok) {
+        alert("Failed to submit episode data");
+      }
+
+      const data = await response.json();
+      if (data.error) alert(data.error);
       setReloadEpisodes(true); // Trigger re-fetch
       handleNewEpisodeCreationSuccess(data);
     } catch (error) {
       handleNewEpisodeCreationError(error as Error);
     }
 
+    // Reset form fields
     setEpisodeTitle("");
     setEpisodeNumber("");
     setFeaturedGuest("");
     setShowEpisodeModal(false);
-  };
+};
+
 
   const handleQuestionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,6 +167,12 @@ const AdminDashboard = () => {
     value ? newChoices[index].choiceText = value : newChoices[index].choiceText = '';
     setChoices(newChoices);
   };
+
+  const handleEpisodeImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setEpisodeImage(e.target.files[0]);
+    }
+  }
 
 
   return (
@@ -253,7 +273,7 @@ const AdminDashboard = () => {
             <Modal.Title>Add New Episode</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Form onSubmit={handleEpisodeSubmit}>
+            <Form onSubmit={handleEpisodeSubmit} encType="multipart/form-data">
               <Form.Group controlId="formEpisodeTitle">
                 <Form.Label>Episode Title</Form.Label>
                 <Form.Control
@@ -283,9 +303,18 @@ const AdminDashboard = () => {
                   placeholder="Enter featured guest (optional)"
                 />
               </Form.Group>
+              <Form.Group controlId="episodeImage">
+                <Form.Label>Episode Image</Form.Label>
+                <Form.Control
+                  type="file"
+                  name="episodeImage"
+                  accept="image/*"
+                  onChange={handleEpisodeImageChange}
+                  required
+                />
+              </Form.Group>
               <div className="text-center pt-3">
-                <Button variant="primary" type="submit" disabled={addingNewEpisode}>
-                  {addingNewEpisode ? "Saving..." : "Save"}
+                <Button variant="primary" type="submit">
                 </Button>
               </div>
             </Form>

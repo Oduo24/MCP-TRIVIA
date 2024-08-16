@@ -26,6 +26,7 @@ class Episode(BaseModel, Base):
     title = Column(String(64), unique=True, nullable=False)
     episode_no = Column(Integer, nullable=True)
     featured_guest = Column(String(100), nullable=True)
+    image_path = Column(String(100), nullable=True)
     questions = relationship('Question', backref='episode')
 
     def __init__(self, **kwargs):

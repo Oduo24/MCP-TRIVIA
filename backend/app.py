@@ -5,6 +5,7 @@ from flask import Flask, request, jsonify, make_response, redirect, url_for
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt, get_jwt_identity, verify_jwt_in_request, set_access_cookies, unset_jwt_cookies
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from functools import wraps
 from datetime import timedelta, datetime, timezone
 import time
@@ -19,9 +20,16 @@ from db_storage import DBStorage
 from sqlalchemy.exc import SQLAlchemyError
 from jwt import PyJWTError
 
+from utility import allowed_file
+
+
 app = Flask(__name__)
 jwt = JWTManager(app)
 CORS(app, supports_credentials=True, resources={r"/*": {"origins": "https://192.168.88.148:5173"}})  # Enable CORS for all routes
+
+# Configure upload folder
+UPLOAD_FOLDER = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # app.secret_key = '1234567890op[kljhtresdfjkl.,mn]'
 app.config["JWT_SECRET_KEY"] = 'os.urandom(32)'
@@ -303,12 +311,27 @@ def get_all_categories():
 def add_new_episode():
     """Adds a new episode to the database"""
     try:
-        data = request.get_json()
-        print(data)
+        # Retrieve form data
+        episode_title = request.form['episodeTitle']
+        episode_number = request.form['episodeNumber']
+        featured_guest = request.form.get('featuredGuest', '')  # Optional field
+
+        # Retrieve the episode image from the request object
+        if 'episodeImage' not in request.files:
+            return jsonify(error='No image part in the request'), 400
+        
+        # Retrieve the episode image from the request object
+        image = request.files['episodeImage']
+
+        filename = secure_filename(image.filename)
+        if image and allowed_file(image.filename):
+            image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
         new_episode = Episode(
-            title = data['episodeTitle'],
-            episode_no = data['episodeNumber'],
-            featured_guest = data['featuredGuest']
+            title = episode_title,
+            episode_no = episode_number,
+            featured_guest = featured_guest,
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename),
         )
         storage.new(new_episode)
         return jsonify(status='Success')
