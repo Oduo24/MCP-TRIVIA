@@ -96,11 +96,11 @@ def create_temp_user():
         access_token = create_access_token(
             identity=username,
             additional_claims={"role": role},
-            expires_delta=timedelta(days=365)
+            expires_delta=False
         )
         response = jsonify(username=new_user.username, role=new_user.role, score=new_user.score)
         response = make_response(response)
-        response.set_cookie('access_token_cookie', access_token, httponly=False, samesite='None', secure=True)
+        response.set_cookie('access_token_cookie', access_token, httponly=False, samesite='None', secure=True, max_age=365*24*60*60)
         
         # Set visited cookie
         expires_at = datetime.now(timezone.utc) + timedelta(days=365)
@@ -114,7 +114,7 @@ def create_temp_user():
         return jsonify(error=str(e)), 500
     finally:
         storage.close()
-    
+
 
 @app.route('/api/register', methods=['POST', 'GET'], strict_slashes=False)
 def register_user():
@@ -148,11 +148,11 @@ def register_user():
             access_token = create_access_token(
                 identity=username,
                 additional_claims={"role": role},
-                expires_delta=timedelta(days=365)
+                expires_delta=False
             )
             response = jsonify(user=new_user.username, role=new_user.role)
             response = make_response(response)
-            response.set_cookie('access_token_cookie', access_token, httponly=False, samesite='None', secure=True)
+            response.set_cookie('access_token_cookie', access_token, httponly=False, samesite='None', secure=True, max_age=365*24*60*60)
             
             # Set visited cookie
             expires_at = datetime.now(timezone.utc) + timedelta(days=365)
@@ -187,11 +187,15 @@ def login():
             access_token = create_access_token(
                 identity=user.username,
                 additional_claims={"role": user.role},
-                expires_delta=timedelta(days=356)
+                expires_delta=False
             )
             response = jsonify(username=user.username, role=user.role, score=user.score)
             response = make_response(response)
-            response.set_cookie('access_token_cookie', access_token, httponly=False, samesite='None', secure=True)
+            response.set_cookie('access_token_cookie', access_token, httponly=False, samesite='None', secure=True, max_age=365*24*60*60)
+            
+            # Set visited cookie
+            expires_at = datetime.now(timezone.utc) + timedelta(days=365)
+            response.set_cookie('visited', 'true', httponly=False, samesite='None', secure=True, expires=expires_at)
             
             return response
 
@@ -412,14 +416,28 @@ def update_username():
             access_token = create_access_token(
                     identity=data["user"],
                     additional_claims={"role": "member"},
-                    expires_delta=timedelta(days=365)
+                    expires_delta=False
                 )
-            response.set_cookie('access_token_cookie', access_token, httponly=False, samesite='None', secure=True)
+            response.set_cookie('access_token_cookie', access_token, httponly=False, samesite='None', secure=True, max_age=365*24*60*60)
         return response
 
     except Exception as e:
         traceback.print_exc()
         return jsonify(error="Error updating username")
+    finally:
+        storage.close()
+
+
+@app.route('/api/featuredEpisodes', methods=['GET'])
+@jwt_required()
+def featuredEpisodes():
+    """Retrieves random 5 podcast episodes with episode image urls"""
+    try:
+        episodes = storage.five_featured_episodes()
+        return jsonify(episodes)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(error='Unable to retrieve top featured episodes')
     finally:
         storage.close()
 

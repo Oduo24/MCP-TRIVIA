@@ -237,6 +237,28 @@ class DBStorage:
         user.username = new_username
         self.save()
         return "Success"
+    
+    def five_featured_episodes(self):
+        """Retrieves five episodes with image urls"""
+        self.reload()
+        # Query to get 5 random episodes where image_url is not null
+        episodes = (
+            self.__session.query(Episode)
+            .filter(Episode.image_path.isnot(None))
+            .order_by(func.random())
+            .limit(5)
+            .all()
+        )
+
+        episodes_list = [{
+            'id': episode.id,
+            'title': episode.title,
+            'episode_no': episode.episode_no,
+            'featured_guest': episode.featured_guest,
+            'image_path': episode.image_path
+        } for episode in episodes]
+
+        return episodes_list
 
 
         
