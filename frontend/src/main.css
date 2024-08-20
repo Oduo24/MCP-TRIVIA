@@ -25,7 +25,7 @@ body {
 }
 
 .btn-primary {
-    background-color: yellow !important;
+    background-color: rgb(255, 255, 0) !important;
     border-color: black !important;
     color: black !important;
 }
@@ -67,9 +67,7 @@ body {
     color: #B9B6B6;
 }
 
-.trivia-title,
-.account-title,
-.leaderboard-title {
+.page-title {
     color: #B9B6B6 !important;
 }
 
@@ -96,4 +94,34 @@ body {
     justify-content: center;
     z-index: 10;
     /* Ensure it's on top of other content */
+}
+
+.active>.page-link,
+.page-link.active {
+    z-index: 3;
+    background-color: yellowgreen !important;
+    /* Example: Green */
+    border-color: yellowgreen !important;
+    color: blue;
+}
+
+.card-body.card-body-custom {
+    padding: 1px !important;
+}
+
+.episode-link,
+.nav-link {
+    text-decoration: none;
+    transition: opacity 0.3s ease;
+    /* Smooth opacity transition over 0.3 seconds */
+}
+
+.episode-link:hover,
+.nav-link:hover {
+    opacity: 0.8;
+    /* Change opacity on hover */
+}
+
+.nav-item a.active {
+    color: #B9B6B6 !important;
 }

@@ -11,10 +11,12 @@ interface AuthContextProps {
   role: "admin" | "member";
   username: string;
   score: number;
+  answeredQuestions: string[];
   setIsAuthenticated: (isAuthenticated: boolean) => void;
   setRole: (role: "admin" | "member") => void;
   setUsername: (username: string) => void;
   setScore: (score: number) => void;
+  setAnsweredQuestions: (questionIds: string[]) => void;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -45,6 +47,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     return storedScore ? JSON.parse(storedScore) : 0;
   });
 
+  const [answeredQuestionsState, setAnsweredQuestionsState] = useState(() => {
+    const storedAnsweredQuestions = localStorage.getItem("answeredQuestions");
+    return storedAnsweredQuestions ? JSON.parse(storedAnsweredQuestions) : [];
+  });
 
 
   // Update localStorage whenever the auth state changes
@@ -67,6 +73,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     localStorage.setItem("score", JSON.stringify(scoreState));
   }, [scoreState]);
 
+  useEffect(() => {
+    localStorage.setItem("answeredQuestions", JSON.stringify(answeredQuestionsState));
+  }, [answeredQuestionsState]);
+
   // Wrapper functions to set state and update localStorage
   const setIsAuthenticated = (isAuthenticated: boolean) => {
     setIsAuthenticatedState(isAuthenticated);
@@ -84,6 +94,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     setScoreState(score);
   };
 
+  const setAnsweredQuestions = (questionIds: string[]) => {
+    setAnsweredQuestionsState((initialQuestionIds: string[]) => (
+      [ ...initialQuestionIds,
+        ...questionIds
+      ]
+    ));
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -91,10 +109,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         role: roleState,
         username: usernameState,
         score: scoreState,
+        answeredQuestions: answeredQuestionsState,
         setIsAuthenticated,
         setRole,
         setUsername,
-        setScore
+        setScore,
+        setAnsweredQuestions
       }}
     >
       {children}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getCookie, isTokenValid } from "../utility";
+import { getCookie } from "../utility";
 import { useNavigate } from "react-router-dom";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
@@ -15,8 +15,17 @@ const useFetch = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // URLs that don't need authentication
+  const openUrls = [
+    'https://192.168.88.148:5000/api/login',
+    'https://192.168.88.148:5000/api/reg_temp_user',
+    'https://192.168.88.148:5000/api/featuredEpisodes',
+    'https://192.168.88.148:5000/api/episodes',
+
+  ];
+
   const fetchData = async ({method, endpoint, headers, body,}: FetchOptions): Promise<any> => {
-    if (endpoint === '/api/login' || '/api/reg_temp_user') {
+    if (openUrls.includes(endpoint)) {
       setLoading(true);
       try {
         const response = await fetch(endpoint, {
@@ -49,7 +58,8 @@ const useFetch = () => {
     } else {
       // The endpoints require authentication, get access token cookie and check if it's expired
       const access_token_cookie = getCookie('access_token_cookie');
-      if (access_token_cookie && isTokenValid(access_token_cookie)) {
+     
+      if (access_token_cookie) {
         setLoading(true);
         try {
           const response = await fetch(endpoint, {

@@ -1,6 +1,6 @@
 
 export interface Question {
-  id: number;
+  id: string;
   question: string;
   episode_name: string;
   options: string[];
@@ -16,6 +16,7 @@ export interface User {
   username: string;
   role: "admin" | "member";
   score: number;
+  answered_questions: string[];
 }
 
 export interface Episode {
@@ -23,6 +24,7 @@ export interface Episode {
   title: string;
   episode_no: number;
   featured_guest: string;
+  image_path: string;
 }
 
 export interface QuestionCategory {

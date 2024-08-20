@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { IconContext } from 'react-icons';
 import { IoHome } from 'react-icons/io5';
 import { MdDashboardCustomize, MdLeaderboard, MdOutlineLogin, MdSwitchAccount } from 'react-icons/md';
-import { Link, Outlet } from 'react-router-dom'
+import { Link, Outlet, NavLink } from 'react-router-dom'
 import { Tooltip, TooltipRefProps } from 'react-tooltip';
 import { useRef } from 'react';
 import { Toaster } from 'react-hot-toast';
@@ -38,37 +38,37 @@ const Header: React.FC<HeaderProps> = ({isAuthenticated, role, username}) => {
             {isAuthenticated && role === 'admin' && (
               <>
                 <li className="nav-item">
-                  <Link className="nav-link text-white" to="/admin/dashboard">
+                  <NavLink className="nav-link text-white" to="/admin/dashboard">
                     <MdDashboardCustomize /> Dashboard
-                  </Link>
+                  </NavLink>
                 </li>
               </>
             )}
             {isAuthenticated && role === 'member' && (
               <> 
                 <li className="nav-item">
-                  <Link className="nav-link text-white" to="/user/home">
+                  <NavLink className="nav-link text-white" to="/user/home">
                     <IoHome /> Home
-                  </Link>
+                  </NavLink>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link text-white" to="/scores">
+                  <NavLink className="nav-link text-white" to="/scores">
                     <MdLeaderboard /> Scores
-                  </Link>
+                  </NavLink>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link text-white account" to="/user/account">
+                  <NavLink className="nav-link text-white account" to="/user/account">
                     <MdSwitchAccount /> Account
-                  </Link>
+                  </NavLink>
                   <Tooltip ref={accountTooltipRef} place='bottom' style={{ backgroundColor: "rgb(185, 182, 182)", color: "#222" }}/>
                 </li>
               </>
             )}
             {!isAuthenticated && (
               <li className="nav-item">
-                <Link className="nav-link text-white" to="/login">
+                <NavLink className="nav-link text-white" to="/login">
                   <MdOutlineLogin />Login
-                </Link>
+                </NavLink>
               </li>
             )}
           </ul>

@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import useFetch from '../../hooks/useFetch';
 import { useAuth } from '../../contexts/AuthContext';
 import { User } from '../../models';
-import { DotLoader } from 'react-spinners';
+import Loader from './Loader';
 
 const FirstVisit = () => {
   const { fetchData, loading } = useFetch();
-  const { setIsAuthenticated, setRole, setUsername, setScore } = useAuth();
+  const { setIsAuthenticated, setRole, setUsername, setScore, setAnsweredQuestions } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,7 +17,7 @@ const FirstVisit = () => {
         navigate('/login');
       } else {
         try {
-          const tempUserEndpoint = "/api/reg_temp_user";
+          const tempUserEndpoint = "https://192.168.88.148:5000/api/reg_temp_user";
           const result = await fetchData({
             method: "GET",
             endpoint: tempUserEndpoint,
@@ -37,8 +37,11 @@ const FirstVisit = () => {
     setRole(user.role);
     setUsername(user.username);
     setScore(user.score);
+    if (user.answered_questions.length !== 0) {
+      setAnsweredQuestions(user.answered_questions);
+    }
 
-    user.role === "admin" ? navigate("/admin/home") : navigate("/trivia");
+    user.role === "admin" ? navigate("/admin/home") : navigate("/user/start");
   };
 
   const handleLoginError = (error: Error) => {
@@ -47,24 +50,10 @@ const FirstVisit = () => {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100vh",
-        }}
-      >
-        <DotLoader
-          color="#fff240"
-          loading={loading}
-          size={150}
-          aria-label="Loading Spinner"
-          data-testid="loader"
-        />
-      </div>
+      <Loader isLoading={true} />
     );
+  } else {
+    
   }
 
   return null;

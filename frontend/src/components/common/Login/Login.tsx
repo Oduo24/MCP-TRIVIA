@@ -6,7 +6,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { errorToast } from "../../../utility";
 
 function Login() {
-  const { setIsAuthenticated, setRole, setUsername, setScore } = useAuth();
+  const { setIsAuthenticated, setRole, setUsername, setScore, setAnsweredQuestions } = useAuth();
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ function Login() {
     setRole(user.role);
     setUsername(user.username);
     setScore(user.score);
+    setAnsweredQuestions(user.answered_questions);
     
     user.role === "admin" ? navigate("/admin/home") : navigate("/user/home");
   };
@@ -34,7 +35,7 @@ function Login() {
         user,
         password,
       };
-      const loginEndpoint = "/api/login";
+      const loginEndpoint = "https://192.168.88.148:5000/api/login";
 
       const login_response = await fetchData({
         method: "POST",

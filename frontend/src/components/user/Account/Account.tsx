@@ -12,7 +12,7 @@ const Account = () => {
     const handleUsernameChange = async(e: React.FormEvent) => {
         e.preventDefault();
 
-        const usernameChangeEndpoint = "/api/change_username";
+        const usernameChangeEndpoint = "https://192.168.88.148:5000/api/change_username";
         try {
             const usernameChange: Success = await fetchData({
                 method: 'POST',
@@ -50,7 +50,7 @@ const Account = () => {
   return (
     <div className="row flex-fill justify-content-center text-center">
          <div className="col-md-8 text-center">
-            <h1 className="my-2 account-title">Account</h1>
+            <h1 className="my-2 page-title">Account</h1>
             <p className='title-text'>Update your Account details here</p>
             <div className="row justify-content-center text-center">
                 <div className="col-md-8 text-center">

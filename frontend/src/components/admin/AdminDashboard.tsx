@@ -66,7 +66,7 @@ const AdminDashboard = () => {
   // fetch episodes
   const loadAdminData = async () => {
     try {
-      const adminDataEndpoint = "/api/admin_data";
+      const adminDataEndpoint = "https://192.168.88.148:5000/api/admin_data";
       const data = await fetchAdminData({
         method: "GET",
         endpoint: adminDataEndpoint,
@@ -91,7 +91,7 @@ const AdminDashboard = () => {
   const handleEpisodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newEpisodeEndpoint = "/api/new_episode";
+    const newEpisodeEndpoint = "https://192.168.88.148:5000/api/new_episode";
 
     // Create a FormData object
     const formData = new FormData();
@@ -134,7 +134,7 @@ const AdminDashboard = () => {
   const handleQuestionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Handle question submission logic
-    const newQuestionEndpoint = "/api/new_question";
+    const newQuestionEndpoint = "https://192.168.88.148:5000/api/new_question";
     const questionData = { 
       selectedEpisode,
       selectedCategory,

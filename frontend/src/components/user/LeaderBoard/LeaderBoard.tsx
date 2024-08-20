@@ -3,8 +3,8 @@ import useFetch from '../../../hooks/useFetch';
 import { Score } from '../../../models';
 import { useAuth } from '../../../contexts/AuthContext';
 import "./leaderboard.css";
-import { DotLoader } from 'react-spinners';
 import { errorToast } from '../../../utility';
+import Loader from '../../common/Loader';
 
 const LeaderBoard: React.FC = () => {
     const {fetchData, loading} = useFetch();
@@ -16,8 +16,9 @@ const LeaderBoard: React.FC = () => {
         errorToast(error.message);
     }
 
+  
     const loadLeaderBoard = async() => {
-        const leaderBoardEndpoint = '/api/leaderboard';
+        const leaderBoardEndpoint = 'https://192.168.88.148:5000/api/leaderboard';
 
         try {
             const data = await fetchData({
@@ -38,30 +39,14 @@ const LeaderBoard: React.FC = () => {
 
     if (loading) {
       return (
-        <div
-          style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100vh",
-          }}
-      >
-        <DotLoader
-          color="#fff240"
-          loading={loading}
-          size={150}
-          aria-label="Loading Spinner"
-          data-testid="loader"
-        />
-      </div>
+        <Loader isLoading={loading} />
       );
     }
 
     return (
-      <div className="row flex-fill justify-content-center full-page-row mx-2">
+      <div className="row flex-fill justify-content-center mx-2">
         <div className='col-md-8 page-title text-center'>
-          <h1 className='leaderboard-title'>LEADERBOARD</h1>
+          <h1 className='page-title'>LEADERBOARD</h1>
           <div className="row justify-content-center my-4 row-container">
             <div className='col-md-6'>
               <div className='row justify-content-center'>
@@ -87,7 +72,7 @@ const LeaderBoard: React.FC = () => {
             <tbody>
               {topScorers.map((scorer: Score, index: number) => (
                 <tr key={index}>
-                  <td>{index + 1}</td>
+                  <td>{index + 1 === 1 ? "🥇" : index + 1 === 2 ? "🥈" : index + 1 === 3 ? "🥉" : index + 1}</td>
                   <td>{scorer.username}</td>
                   <td>{scorer.score}</td>
                 </tr>
