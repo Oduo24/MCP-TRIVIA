@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { Answers, Question } from '../../../models';
 import useFetch from '../../../hooks/useFetch';
@@ -12,176 +12,161 @@ import poor from "../../../lottie/poor.json";
 import NoQuestions from '../NoQuestions/NoQuestions';
 
 const EpisodeTrivia: React.FC = () => {
-    const params = useParams(); // Gets the params passed (episodeId and episodeNumber)
-    const [questions, setQuestions] = useState<Question[]>([]);
-    const [unansweredQuestions, setUnansweredQuestions] = useState<Question[]>([]);
-    const [answers, setAnswers] = useState<Answers>({});
-    const {score, setScore, username, setAnsweredQuestions, answeredQuestions} = useAuth();
-    const [startIndex, setStartIndex] = useState(0);
-    const questionsPerPage = 3;
-    const { fetchData: fetchQuestions, loading: loadingQuestions } = useFetch();
-    const { fetchData: submitData, loading: loadingSubmit } = useFetch();
-    const navigate = useNavigate();
-    const [isCelebrating, setIsCelebrating] = useState(false);
-    const [poorScore, setPoorScore] = useState(false);
+  const params = useParams();
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [unansweredQuestions, setUnansweredQuestions] = useState<Question[]>([]);
+  const [answers, setAnswers] = useState<Answers>({});
+  const { score, setScore, username, setAnsweredQuestions, answeredQuestions } = useAuth();
+  const [startIndex, setStartIndex] = useState(0);
+  const questionsPerPage = 3;
+  const { fetchData: fetchQuestions, loading: loadingQuestions } = useFetch();
+  const { fetchData: submitData, loading: loadingSubmit } = useFetch();
+  const navigate = useNavigate();
+  const [isCelebrating, setIsCelebrating] = useState(false);
+  const [poorScore, setPoorScore] = useState(false);
+  const [readyToRender, setReadyToRender] = useState(false);
 
-    const handleLoadQuestionsError = (error: Error) => {
-        errorToast('Error getting scores');
-        console.error(error);
-      };
-    
-    const handleSubmitError = (error: Error) => {
-      errorToast('Error getting scores');
-      console.error(error);
-    };
-    
-    useEffect(()=> {
-      const loadQuestions = async () => {
-        try {
-          const questionsEndpoint = "https://192.168.88.148:5000/api/questions";
-          const data = await fetchQuestions({
-            method: "POST",
-            endpoint: questionsEndpoint,
-            body: params
-          });
-          setQuestions(data);
-        } catch (error) {
-          handleLoadQuestionsError(error as Error);
-        }
-      };
-      loadQuestions();
-    }, [params.episodeId])
+  const handleLoadQuestionsError = (error: Error) => {
+    errorToast('Error getting questions');
+    console.error(error);
+  };
 
-    // Whenever the state of questions change this runs to set only questions that are unanswered
-    useEffect(() => {
-      if (answeredQuestions.length === 0) {
-        setUnansweredQuestions(questions);
-      } else {
-        const userUnansweredQuestions = questions.filter((question: Question) => 
-          !answeredQuestions.includes(question.id)
-        );
-        setUnansweredQuestions(userUnansweredQuestions);
-      }
-    }, [questions, answeredQuestions])
-    
+  const handleSubmitError = (error: Error) => {
+    errorToast('Error submitting answers');
+    console.error(error);
+  };
 
-    
-    const handleChange = (questionId: string, option: string) => {
-      setAnswers({
-        ...answers,
-        [questionId]: option,
-      });
-    };
-    
-    const notify = (message: string, icon: string) => {
-      toast(message, {icon: icon});
-    }
-    
-    const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
+  useEffect(() => {
+    const loadQuestions = async () => {
       try {
-        const scoreEndpoint = "https://192.168.88.148:5000/api/score";
-        const data = await submitData({
+        const questionsEndpoint = "https://192.168.88.148:5000/api/questions";
+        const data = await fetchQuestions({
           method: "POST",
-          endpoint: scoreEndpoint,
-          body: answers,
+          endpoint: questionsEndpoint,
+          body: params
         });
-        // Update answeredQuestions for the user
-        setAnsweredQuestions(data.answered_question_ids);
-
-        // Check if the score is 3/3 and set the celebration animation
-        if (data.score - score === 3) {
-          setIsCelebrating(true);
-          // Send a toast
-          const message = '3/3, you really are a chequemate';
-          const icon = '🥳';
-          notify(message, icon);
-        }
-        // Check if the score is 0/3 and set poor score animation
-        else if(data.score - score === 0) {
-          setPoorScore(true);
-          // Send a toast
-          const message = '0/3';
-          const icon = '😞';
-          notify(message, icon);
-        } else {
-          // Send a toast
-          const userscore = data.score - score;
-          const message = `${userscore}`;
-          const icon = '😐';
-          notify(message, icon);
-          handleCelebrationComplete();
-        }
-        // Update overall score
-        setScore(data.score);
-
-        
+        setQuestions(data);
       } catch (error) {
-        handleSubmitError(error as Error);
+        handleLoadQuestionsError(error as Error);
       }
     };
-    
-    
-    const handleCelebrationComplete = () => {
-      // Stop celebration or poor score animation depending on which called the function
-      if (isCelebrating) setIsCelebrating(false);
-      if (poorScore) setPoorScore(false);
-  
-      if (startIndex + questionsPerPage < unansweredQuestions.length) {
-        setStartIndex(startIndex + questionsPerPage);
-        setAnswers({}); // Reset answers for the next set of questions
-      } else {
-        navigate('/scores');
-        successToast('No more questions available');
-      }
-    };
-    
+    loadQuestions();
+  }, [params.episodeId]);
 
+  useEffect(() => {
+    if (questions.length === 0) return;
 
-    if (loadingQuestions) {
-      return (
-        <Loader isLoading={true}/>
+    if (answeredQuestions.length === 0) {
+      setUnansweredQuestions(questions);
+    } else {
+      const userUnansweredQuestions = questions.filter((question: Question) =>
+        !answeredQuestions.includes(question.id)
       );
+      setUnansweredQuestions(userUnansweredQuestions);
     }
-    
-    return (
-      <div className="row justify-content-center position-relative">
-        {isCelebrating && (
-          <div className="celebration-overlay">
-            <div className="col-md-4 text-center">
-              <Lottie 
-                loop={false} 
-                onComplete={handleCelebrationComplete} 
-                animationData={celebrate} 
-                style={{ width: 400, height: 400 }}
-              />
-            </div>
+    console.log(unansweredQuestions)
+
+    // Indicate that everything is ready to render
+    setReadyToRender(true);
+  }, [questions]);
+
+  const handleChange = (questionId: string, option: string) => {
+    setAnswers({
+      ...answers,
+      [questionId]: option,
+    });
+  };
+
+  const notify = (message: string, icon: string) => {
+    toast(message, { icon: icon });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const scoreEndpoint = "https://192.168.88.148:5000/api/score";
+      const data = await submitData({
+        method: "POST",
+        endpoint: scoreEndpoint,
+        body: answers,
+      });
+      setAnsweredQuestions(data.answered_question_ids);
+
+      if (data.score - score === 3) {
+        setIsCelebrating(true);
+        const message = '3/3, you really are a chequemate';
+        const icon = '🥳';
+        notify(message, icon);
+      } else if (data.score - score === 0) {
+        setPoorScore(true);
+        const message = '0/3';
+        const icon = '😞';
+        notify(message, icon);
+      } else {
+        handleCelebrationComplete();
+      }
+      setScore(data.score);
+
+    } catch (error) {
+      handleSubmitError(error as Error);
+    }
+  };
+
+  const handleCelebrationComplete = () => {
+    if (isCelebrating) setIsCelebrating(false);
+    if (poorScore) setPoorScore(false);
+
+    if (startIndex + questionsPerPage < unansweredQuestions.length) {
+      setStartIndex(startIndex + questionsPerPage);
+      setAnswers({}); // Reset answers for the next set of questions
+    } else {
+      navigate('/scores');
+      successToast('No more questions available');
+    }
+  };
+
+  if (loadingQuestions || !readyToRender) {
+    return <Loader isLoading={true} />;
+  }
+
+  return (
+    <div className="row justify-content-center position-relative">
+      {isCelebrating && (
+        <div className="celebration-overlay">
+          <div className="col-md-4 text-center">
+            <Lottie
+              loop={false}
+              onComplete={handleCelebrationComplete}
+              animationData={celebrate}
+              style={{ width: 400, height: 400 }}
+            />
           </div>
-        )}
-    
-        {poorScore && (
-          <div className="poor-score-overlay">
-            <div className="col-md-4 text-center">
-              <Lottie 
-                loop={false} 
-                onComplete={handleCelebrationComplete} 
-                animationData={poor} 
-                style={{ width: 400, height: 400 }} 
-              />
-            </div>
+        </div>
+      )}
+
+      {poorScore && (
+        <div className="poor-score-overlay">
+          <div className="col-md-4 text-center">
+            <Lottie
+              loop={false}
+              onComplete={handleCelebrationComplete}
+              animationData={poor}
+              style={{ width: 400, height: 400 }}
+            />
           </div>
-        )}
-    
-        <form onSubmit={handleSubmit}>
-          <div className="row justify-content-center">
-            <div className="col-md-8 justify-content-center">
-              <h1 className="my-2 text-white page-title">Trivia</h1>
-              <div>
-                {score !== null && (
-                  <h4 className="text-white">{username}: {score}</h4>
-                )}
-              </div>
-              {unansweredQuestions.length > 0 ? (
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit}>
+        <div className="row justify-content-center">
+          <div className="col-md-8 justify-content-center">
+            <h1 className="my-2 text-white page-title">Trivia</h1>
+            <div>
+              {score !== null && (
+                <h4 className="text-white">{username}: {score}</h4>
+              )}
+            </div>
+            {unansweredQuestions.length > 0 ? (
               unansweredQuestions
                 .slice(startIndex, startIndex + questionsPerPage)
                 .map((question: Question) => (
@@ -210,8 +195,9 @@ const EpisodeTrivia: React.FC = () => {
             ) : (
               <NoQuestions />
             )}
-            </div>
           </div>
+        </div>
+        {unansweredQuestions.length > 0 && (
           <div className="justify-content-center text-center">
             <button
               type="submit"
@@ -221,10 +207,10 @@ const EpisodeTrivia: React.FC = () => {
               {loadingSubmit ? "Calculating score..." : "Submit"}
             </button>
           </div>
-        </form>
-      </div>
-    );
-    
-}
+        )}
+      </form>
+    </div>
+  );
+};
 
-export default EpisodeTrivia
+export default EpisodeTrivia;
