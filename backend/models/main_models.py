@@ -1,6 +1,6 @@
 """Base model for all models"""
 
-from sqlalchemy import Column, String, DateTime, Date, Integer, Enum, Float, Index, ForeignKey, Boolean
+from sqlalchemy import Column, String, DateTime, Date, Integer, Enum, Float, Index, ForeignKey, Boolean, Table
 from sqlalchemy.orm import relationship
 from models.base_model import BaseModel, Base
 
@@ -12,6 +12,15 @@ class User(BaseModel, Base):
     password = Column(String(500), nullable=False)
     role = Column(Enum('admin', 'member'), nullable=False)
     score = Column(Integer, nullable=False, default=0)
+
+    # Defining relationship between users and questions
+    answered_questions = relationship('UserAnsweredQuestion')
+
+    # Defining relationship between users and episodes
+    answered_episodes = relationship(
+        'Episode',
+        secondary='user_answered_episodes',
+    )
 
 
     def __init__(self, **kwargs):
@@ -45,6 +54,8 @@ class Question(BaseModel, Base):
     episode_id = Column(String(100), ForeignKey('episodes.id'), nullable=True)
     category_id = Column(String(100), ForeignKey('categories.id'), nullable=True)
     answers = relationship('Answer', backref='question')
+
+    users_answered = relationship("UserAnsweredQuestion")
 
     def __init__(self, **kwargs):
         """Initializes an instance
@@ -84,3 +95,23 @@ class Answer(BaseModel, Base):
 
     def __repr__(self):
         return f'<Answer {self.answer_text} {"(correct)" if self.is_correct else ""}>'
+
+    
+# Association class(table) between Users and Questions
+class UserAnsweredQuestion(Base):
+    __tablename__ = 'user_answered_questions'
+    user_id = Column(String(100), ForeignKey('users.id'), primary_key=True)
+    question_id = Column(String(100), ForeignKey('questions.id'), primary_key=True)
+    episode_id = Column(String(100), ForeignKey('episodes.id'))
+    isCorrect = Column(Boolean, default=False)
+
+
+
+# Association table between Users and Episodes
+user_answered_episodes = Table(
+    "user_answered_episodes", Base.metadata,
+    Column('user_id', String(100), ForeignKey('users.id'), nullable=False),
+    Column('episode_id', String(100), ForeignKey('episodes.id'), nullable=False),
+    Column('episode_score', nullable=False, default=0),
+)
+

@@ -37,6 +37,22 @@ app.config['JWT_TOKEN_LOCATION'] = ['cookies']  # Instruct Flask-JWT-Extended to
 app.config['JWT_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
 app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 
+# Initialize the database
+storage = DBStorage()
+storage.reload()
+
+
+@app.before_request
+def create_session():
+    # This ensures that each request gets its own session
+    storage = DBStorage()
+    request.db_session = storage.Session()
+
+@app.teardown_request
+def teardown_request(exception=None):
+    if exception:
+        request.db_session.rollback()
+    storage.close()
 
 def role_required(*roles):
     """Roles check wrapper"""
@@ -53,11 +69,6 @@ def role_required(*roles):
         return decorator
     return wrapper
 
-# Instantiate a storage object and flush all classes that needs to be mapped to database tables
-storage = DBStorage()
-storage.reload()
-storage.save()
-storage.close()
 
 @app.route('/api/reg_temp_user', methods=['GET'], strict_slashes=False)
 def create_temp_user():
@@ -77,14 +88,13 @@ def create_temp_user():
     password = generate_password()
     role = 'member'
 
-    # Check if username already exists
-    if storage.get_user(username):
-        return jsonify({"error": "Username already exists"}), 400
-
-    password_hashed = generate_password_hash(password)
-
     try:
-        storage.reload()
+        # Check if username already exists
+        if storage.get_user(username):
+            return jsonify({"error": "Username already exists"}), 400
+
+        password_hashed = generate_password_hash(password)
+
         new_user = User(
             username=username,
             password=password_hashed,
@@ -98,7 +108,13 @@ def create_temp_user():
             additional_claims={"role": role},
             expires_delta=False
         )
-        response = jsonify(username=new_user.username, role=new_user.role, score=new_user.score)
+        response = jsonify(
+            username=new_user.username,
+            role=new_user.role,
+            score=new_user.score,
+            answered_questions=[],
+            answered_episodes=[],
+        )
         response = make_response(response)
         response.set_cookie('access_token_cookie', access_token, httponly=False, samesite='None', secure=True, max_age=365*24*60*60)
         
@@ -109,11 +125,8 @@ def create_temp_user():
         return response
 
     except (SQLAlchemyError, PyJWTError) as e:
-        storage.rollback()
         traceback.print_exc()
         return jsonify(error=str(e)), 500
-    finally:
-        storage.close()
 
 
 @app.route('/api/register', methods=['POST', 'GET'], strict_slashes=False)
@@ -136,7 +149,6 @@ def register_user():
         password_hashed = generate_password_hash(password)
 
         try:
-            storage.reload()
             new_user = User(
                 username=username,
                 password=password_hashed,
@@ -164,8 +176,7 @@ def register_user():
             storage.rollback()
             traceback.print_exc()
             return jsonify(error=str(e)), 500
-        finally:
-            storage.close()
+
     else:
         return jsonify({"error": "Invalid method"}), 405
 
@@ -178,7 +189,6 @@ def login():
         password = login_data.get('password')
 
         try:
-            storage.reload()
             user = storage.get_user(username)
 
             if not user or not check_password_hash(user.password, password):
@@ -189,7 +199,13 @@ def login():
                 additional_claims={"role": user.role},
                 expires_delta=False
             )
-            response = jsonify(username=user.username, role=user.role, score=user.score)
+            response = jsonify(
+                username=user.username,
+                role=user.role,
+                score=user.score,
+                answered_questions=[question.question_id for question in user.answered_questions],
+                answered_episodes=[episode.id for episode in user.answered_episodes],
+            )
             response = make_response(response)
             response.set_cookie('access_token_cookie', access_token, httponly=False, samesite='None', secure=True, max_age=365*24*60*60)
             
@@ -204,8 +220,6 @@ def login():
             traceback.print_exc()
             return jsonify(error=str(e)), 500
 
-        finally:
-            storage.close()
     return jsonify({"error": "Invalid method"}), 405
 
 
@@ -239,18 +253,18 @@ def logout():
 #         # Case where there is not a valid JWT. Just return the original response
 #         return response
 
-@app.route('/api/questions', methods=['GET'])
+@app.route('/api/questions', methods=['POST'])
 @jwt_required()
 def get_questions():
     """retrieves trivia questions"""
     try:
-        questions = storage.all_questions()
+        episode_id = request.get_json()["episodeId"]
+        questions = storage.all_questions(episode_id)
         return jsonify(questions)
     except Exception as e:
         traceback.print_exc()
         return jsonify(error="Error retrieving questions")
-    finally:
-        storage.close()
+
 
 @app.route('/api/score', methods=['POST'])
 @jwt_required()
@@ -258,16 +272,25 @@ def calculate_score():
     """calculates scores"""
     try:
         player_answers = request.json
+        question_ids = list(player_answers.keys())
         username = get_jwt_identity()
-        score = storage.update_score(username, player_answers)
 
-        return jsonify({"score": score})
+        score, episode_id, episode_score = storage.update_score(username, player_answers)
+        
+        if episode_id and episode_score:
+            return jsonify(
+                score=score,
+                answered_question_ids=question_ids,
+                episode_id=[episode_id,],
+                episode_score=episode_score,
+            )
+        return jsonify(score=score, answered_question_ids=question_ids)
     except Exception as e:
         storage.rollback()
         traceback.print_exc()
         return jsonify(error="Error calculating score")
     finally:
-        storage.close()
+        storage.save()
 
 @app.route('/api/leaderboard', methods=['GET'])
 @jwt_required()
@@ -276,16 +299,12 @@ def get_leader_board():
     try:
         username = get_jwt_identity()
         leader_board = storage.get_top_scores(username)
-        print(leader_board)
         return jsonify(leader_board)
     except Exception as e:
         traceback.print_exc()
         return jsonify(error='Error getting score board')
-    finally:
-        storage.close()
 
 @app.route('/api/episodes', methods=['GET'])
-@jwt_required()
 def get_all_episodes():
     """Retrieves all podcast episodes in the database"""
     try:
@@ -294,8 +313,7 @@ def get_all_episodes():
     except Exception as e:
         traceback.print_exc()
         return jsonify(error='Unable to retrieve episodes')
-    finally:
-        storage.close()
+
 
 @app.route('/api/categories', methods=['GET'])
 @jwt_required()
@@ -307,8 +325,6 @@ def get_all_categories():
     except Exception as e:
         traceback.print_exc()
         return jsonify(error='Unable to retrieve categories')
-    finally:
-        storage.close()
 
 @app.route('/api/new_episode', methods=['POST'])
 @jwt_required()
@@ -338,16 +354,14 @@ def add_new_episode():
             image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename),
         )
         storage.new(new_episode)
+        storage.save()
         return jsonify(status='Success')
 
     except Exception as e:
         traceback.print_exc()
         storage.rollback()
         return jsonify(error='Unable to add episode')
-    
-    finally:
-        storage.save()
-        storage.close()
+            
 
 @app.route('/api/new_question', methods=['POST'])
 @jwt_required()
@@ -355,7 +369,6 @@ def add_new_question():
     """Adds a new question to the database"""
     try:
         data = request.get_json()
-        print(data)
         new_question = Question(
             question_text=data['question'],
             episode_id=data['selectedEpisode'],
@@ -377,6 +390,7 @@ def add_new_question():
         for choice in answer_objects:
             storage.new(choice)
 
+        storage.save()
         return jsonify(status='Success')
 
     except Exception as e:
@@ -384,9 +398,6 @@ def add_new_question():
         storage.rollback()
         return jsonify(error='Unable to add question')
     
-    finally:
-        storage.save()
-        storage.close()
 
 @app.route('/api/admin_data', methods=['GET'])
 @jwt_required()
@@ -398,8 +409,7 @@ def get_admin_data():
     except Exception as e:
         traceback.print_exc()
         return jsonify(error='Unable to retrieve dashboard data')
-    finally:
-        storage.close()
+    
 
 @app.route('/api/change_username', methods=['POST'])
 @jwt_required()
@@ -424,12 +434,9 @@ def update_username():
     except Exception as e:
         traceback.print_exc()
         return jsonify(error="Error updating username")
-    finally:
-        storage.close()
 
 
 @app.route('/api/featuredEpisodes', methods=['GET'])
-@jwt_required()
 def featuredEpisodes():
     """Retrieves random 5 podcast episodes with episode image urls"""
     try:
@@ -438,8 +445,6 @@ def featuredEpisodes():
     except Exception as e:
         traceback.print_exc()
         return jsonify(error='Unable to retrieve top featured episodes')
-    finally:
-        storage.close()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, ssl_context=('192.168.88.148.pem', '192.168.88.148-key.pem'), debug=True)
