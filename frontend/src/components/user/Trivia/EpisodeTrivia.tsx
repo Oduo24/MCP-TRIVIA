@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
-import { Answers, Question } from '../../../models';
+import { Answers, Question, TriviaResponseData } from '../../../models';
 import useFetch from '../../../hooks/useFetch';
 import { errorToast, successToast } from '../../../utility';
 import toast from 'react-hot-toast';
@@ -16,7 +16,7 @@ const EpisodeTrivia: React.FC = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [unansweredQuestions, setUnansweredQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Answers>({});
-  const { score, setScore, username, setAnsweredQuestions, answeredQuestions } = useAuth();
+  const { score, setScore, username, setAnsweredQuestions, answeredQuestions, setAnsweredEpisodes } = useAuth();
   const [startIndex, setStartIndex] = useState(0);
   const questionsPerPage = 3;
   const { fetchData: fetchQuestions, loading: loadingQuestions } = useFetch();
@@ -25,6 +25,7 @@ const EpisodeTrivia: React.FC = () => {
   const [isCelebrating, setIsCelebrating] = useState(false);
   const [poorScore, setPoorScore] = useState(false);
   const [readyToRender, setReadyToRender] = useState(false);
+  const [episodeScore, setEpisodeScore] = useState(0);
 
   const handleLoadQuestionsError = (error: Error) => {
     errorToast('Error getting questions');
@@ -64,7 +65,6 @@ const EpisodeTrivia: React.FC = () => {
       );
       setUnansweredQuestions(userUnansweredQuestions);
     }
-    console.log(unansweredQuestions)
 
     // Indicate that everything is ready to render
     setReadyToRender(true);
@@ -85,12 +85,19 @@ const EpisodeTrivia: React.FC = () => {
     e.preventDefault();
     try {
       const scoreEndpoint = "https://192.168.88.148:5000/api/score";
-      const data = await submitData({
+      const data: TriviaResponseData = await submitData({
         method: "POST",
         endpoint: scoreEndpoint,
         body: answers,
       });
+      // Set answered questions
       setAnsweredQuestions(data.answered_question_ids);
+
+      // Set answeredEpisode if it was the last set of questions
+      if (data.episode_id && data.episode_score) {
+        setAnsweredEpisodes(data.episode_id);
+        setEpisodeScore(data.episode_score);
+      }
 
       if (data.score - score === 3) {
         setIsCelebrating(true);
@@ -120,8 +127,8 @@ const EpisodeTrivia: React.FC = () => {
       setStartIndex(startIndex + questionsPerPage);
       setAnswers({}); // Reset answers for the next set of questions
     } else {
-      navigate('/scores');
       successToast('No more questions available');
+      navigate(`/user/end_of_trivia/${params.episodeId}/${episodeScore}/${questions.length}`);
     }
   };
 

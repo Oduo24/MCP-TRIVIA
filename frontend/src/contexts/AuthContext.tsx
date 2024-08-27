@@ -12,11 +12,13 @@ interface AuthContextProps {
   username: string;
   score: number;
   answeredQuestions: string[];
+  answeredEpisodes: string[];
   setIsAuthenticated: (isAuthenticated: boolean) => void;
   setRole: (role: "admin" | "member") => void;
   setUsername: (username: string) => void;
   setScore: (score: number) => void;
   setAnsweredQuestions: (questionIds: string[]) => void;
+  setAnsweredEpisodes: (episodeId: string[]) => void;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -52,6 +54,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     return storedAnsweredQuestions ? JSON.parse(storedAnsweredQuestions) : [];
   });
 
+  const [answeredEpisodesState, setAnsweredEpisodesState] = useState(() => {
+    const storedAnsweredEpisodes = localStorage.getItem("answeredEpisodes");
+    return storedAnsweredEpisodes ? JSON.parse(storedAnsweredEpisodes) : [];
+  })
+
 
   // Update localStorage whenever the auth state changes
   useEffect(() => {
@@ -77,6 +84,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     localStorage.setItem("answeredQuestions", JSON.stringify(answeredQuestionsState));
   }, [answeredQuestionsState]);
 
+  useEffect(() => {
+    localStorage.setItem("answeredEpisodes", JSON.stringify(answeredEpisodesState));
+  }, [answeredEpisodesState]);
+
   // Wrapper functions to set state and update localStorage
   const setIsAuthenticated = (isAuthenticated: boolean) => {
     setIsAuthenticatedState(isAuthenticated);
@@ -97,7 +108,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const setAnsweredQuestions = (questionIds: string[]) => {
     setAnsweredQuestionsState((initialQuestionIds: string[]) => (
       [ ...initialQuestionIds,
-        ...questionIds
+        ...questionIds,
+      ]
+    ));
+  };
+
+  const setAnsweredEpisodes = (episodeId: string[]) => {
+    setAnsweredEpisodesState((initialEpisodeIds: string[]) => (
+      [ ...initialEpisodeIds,
+        ...episodeId,
       ]
     ));
   };
@@ -110,11 +129,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         username: usernameState,
         score: scoreState,
         answeredQuestions: answeredQuestionsState,
+        answeredEpisodes: answeredEpisodesState,
         setIsAuthenticated,
         setRole,
         setUsername,
         setScore,
-        setAnsweredQuestions
+        setAnsweredQuestions,
+        setAnsweredEpisodes
       }}
     >
       {children}

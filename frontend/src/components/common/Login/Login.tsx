@@ -6,7 +6,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { errorToast } from "../../../utility";
 
 function Login() {
-  const { setIsAuthenticated, setRole, setUsername, setScore, setAnsweredQuestions } = useAuth();
+  const { setIsAuthenticated, setRole, setUsername, setScore, setAnsweredQuestions, setAnsweredEpisodes } = useAuth();
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -18,6 +18,11 @@ function Login() {
     setUsername(user.username);
     setScore(user.score);
     setAnsweredQuestions(user.answered_questions);
+    // Since answered_episodes is optional, check first if it's available
+    if (user.answered_episodes) {
+      setAnsweredEpisodes(user.answered_episodes);
+    }
+    
     
     user.role === "admin" ? navigate("/admin/home") : navigate("/user/home");
   };

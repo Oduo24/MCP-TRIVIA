@@ -17,6 +17,7 @@ export interface User {
   role: "admin" | "member";
   score: number;
   answered_questions: string[];
+  answered_episodes?: string[];
 }
 
 export interface Episode {
@@ -44,5 +45,12 @@ export interface QuestionChoice {
 export interface Score {
   username: string;
   score: number;
+}
+
+export interface TriviaResponseData {
+  score: number;
+  answered_question_ids: string[];
+  episode_id?: string[];
+  episode_score?: number;
 }
 

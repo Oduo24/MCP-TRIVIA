@@ -8,7 +8,7 @@ import Loader from './Loader';
 
 const FirstVisit = () => {
   const { fetchData, loading } = useFetch();
-  const { setIsAuthenticated, setRole, setUsername, setScore, setAnsweredQuestions } = useAuth();
+  const { setIsAuthenticated, setRole, setUsername, setScore, setAnsweredQuestions, setAnsweredEpisodes } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,6 +39,12 @@ const FirstVisit = () => {
     setScore(user.score);
     if (user.answered_questions.length !== 0) {
       setAnsweredQuestions(user.answered_questions);
+    }
+    // Since answered_episodes variable is optional, check first if it's available
+    if (user.answered_episodes) {
+      if (user.answered_episodes.length !== 0) {
+        setAnsweredEpisodes(user.answered_episodes);
+      }
     }
 
     user.role === "admin" ? navigate("/admin/home") : navigate("/user/start");
