@@ -379,7 +379,7 @@ class DBStorage:
             session.query(Episode)
             .filter(Episode.image_path.isnot(None))
             .order_by(func.random())
-            .limit(5)
+            .limit(3)
             .all()
         )
         self.close()
