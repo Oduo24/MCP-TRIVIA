@@ -30,7 +30,7 @@ const Header: React.FC<HeaderProps> = ({isAuthenticated, role, username}) => {
   return (
     <>
     <IconContext.Provider value={{ color: "yellow", className: "global-class-name" }}>
-    <div className="row flex-fill justify-content-center text-center">
+    <div className="row flex-fill justify-content-center">
       <div className="col-md-8 mt-5">
         <Toaster/>
         <nav className="d-flex justify-content-center">

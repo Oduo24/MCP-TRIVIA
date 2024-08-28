@@ -44,7 +44,7 @@ const LeaderBoard: React.FC = () => {
     }
 
     return (
-      <div className="row flex-fill justify-content-center mx-2">
+      <div className="row flex-fill justify-content-center">
         <div className='col-md-8 page-title text-center'>
           <h1 className='page-title'>LEADERBOARD</h1>
           <div className="row justify-content-center my-4 row-container">

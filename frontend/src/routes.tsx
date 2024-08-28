@@ -8,7 +8,6 @@ import FirstVisit from "./components/common/FirstVisit";
 import Account from "./components/user/Account/Account";
 import Start from "./components/user/Start/Start";
 import EpisodeTrivia from "./components/user/Trivia/EpisodeTrivia"
-import EndOfTrivia from "./components/user/EndOfTrivia/EndOfTrivia";
 
 export const adminRoutes: RouteObject[] = [
   { path: "/admin/home", element: <AdminDashboard /> },
@@ -23,7 +22,6 @@ export const userRoutes: RouteObject[] = [
   { path: "/user/account", element: <Account /> },
   { path: "/user/start", element: <Start /> },
   { path: "/user/trivia/:episodeId/:episodeNumber", element: <EpisodeTrivia /> },
-  { path: "/user/end_of_trivia/:episodeId/:episodeScore/:totalQuestions", element: <EndOfTrivia /> },
 ];
 
 export const commonRoutes: RouteObject[] = [

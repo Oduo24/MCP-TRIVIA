@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Episode } from '../models';
 
 // Create context
@@ -11,10 +11,19 @@ const EpisodesContext = createContext<EpisodesContextProps | undefined>(undefine
 
 // Create provider
 export const EpisodesProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
-    const [episodes, setEpisodes] = useState<Episode[]>([]);
+    // Load initial state from local storage or use default
+    const [episodes, setEpisodes] = useState<Episode[]>(() => {
+        const storedEpisodes = localStorage.getItem('episodes');
+        return storedEpisodes ? JSON.parse(storedEpisodes) : [];
+    });
+
+    useEffect(() => {
+        localStorage.setItem('episodes', JSON.stringify(episodes));
+    }, [episodes]);
+
 
     return (
-        <EpisodesContext.Provider value={{episodes, setEpisodes}}>
+        <EpisodesContext.Provider value={{ episodes, setEpisodes }}>
             {children}
         </EpisodesContext.Provider>
     );
@@ -26,5 +35,5 @@ export const useEpisodes = (): EpisodesContextProps => {
     if (!context) {
         throw new Error('useEpisodes must be used within an EpisodesProvider');
     }
-    return context
-}
+    return context;
+};

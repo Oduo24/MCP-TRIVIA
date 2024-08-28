@@ -4,6 +4,7 @@ import { errorToast } from '../../../utility';
 import { Episode } from '../../../models';
 import Loader from '../../common/Loader';
 import { Link } from 'react-router-dom';
+import { useEpisodes } from '../../../contexts/episodesContext';
 
 const Start: React.FC = () => {
     // Get all episodes and display as cards(Use pagination)
@@ -23,6 +24,8 @@ const Start: React.FC = () => {
     const [allImagesLoaded, setAllImagesLoaded] = useState(false);
     const [loadedImagesCount, setLoadedImagesCount] = useState(0);
 
+    const { setEpisodes } = useEpisodes();
+
     useEffect(()=>{
         const getEpisodesData = async () => {
             const episodesEndpoint = 'https://192.168.88.148:5000/api/episodes';
@@ -32,6 +35,7 @@ const Start: React.FC = () => {
                     endpoint: episodesEndpoint,
                 })
                 setEpisodesData(episodesData);
+                setEpisodes(episodesData);
             } catch(error) {
                 handleEpisodesRetrievalError(error as Error);
             }

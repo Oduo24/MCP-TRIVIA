@@ -70,7 +70,7 @@ const Home = () => {
                 <div className="card mb-4">
                   <img src={`https://192.168.88.148:5000/${episode.image_path}`} onLoad={handleOnload} className="card-img-top" alt={`${episode.episode_no} ${episode.title}`} />
                   <div className="card-body card-body-custom">
-                      <p className="card-text">{episode.episode_no}</p>
+                      <p className="card-text">{episode.episode_no} {episode.title}</p>
                   </div>
                 </div>
               </div>

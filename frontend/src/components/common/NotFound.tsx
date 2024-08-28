@@ -3,7 +3,7 @@ import error404 from "../../lottie/error404.json";
 
 const NotFound = () => {
   return (
-    <div className="row flex-fill justify-content-center mx-2">
+    <div className="row flex-fill justify-content-center">
         <div className='col-md-4 text-center'>
           <Lottie
             loop={true} 

@@ -9,6 +9,7 @@ import AuthGuard from "./AuthGuard";
 import { adminRoutes, userRoutes, commonRoutes } from "./routes";
 import Header from "./components/user/Header/Header";
 import Footer from "./components/user/Footer/Footer";
+import { EpisodesProvider } from "./contexts/episodesContext";
 
 
 const renderRoutes = (routes: RouteObject[]) =>
@@ -19,7 +20,9 @@ const renderRoutes = (routes: RouteObject[]) =>
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <AuthGuardWrapper />
+      <EpisodesProvider>
+        <AuthGuardWrapper />
+      </EpisodesProvider>
     </AuthProvider>
   );
 };
