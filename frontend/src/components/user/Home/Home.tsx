@@ -19,7 +19,7 @@ const Home = () => {
   useEffect(() => {
     const getEpisodeImageUrls = async () => {
       try{
-        const episodeImageUrlsEndpoint = 'https://192.168.88.148:5000/api/featuredEpisodes';
+        const episodeImageUrlsEndpoint = '/api/featuredEpisodes';
         const episodeImageUrls = await fetchData({
           method: 'GET',
           endpoint: episodeImageUrlsEndpoint,
@@ -68,7 +68,7 @@ const Home = () => {
             imageUrls.map((episode: Episode) => (
               <div className="col-md-4 text-center" key={episode.id}>
                 <div className="card mb-4">
-                  <img src={`https://192.168.88.148:5000/${episode.image_path}`} onLoad={handleOnload} className="card-img-top" alt={`${episode.episode_no} ${episode.title}`} />
+                  <img src={episode.image_path} onLoad={handleOnload} className="card-img-top" alt={`${episode.episode_no} ${episode.title}`} />
                   <div className="card-body card-body-custom">
                       <p className="card-text">{episode.episode_no} {episode.title}</p>
                   </div>

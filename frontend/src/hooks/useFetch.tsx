@@ -17,11 +17,10 @@ const useFetch = () => {
 
   // URLs that don't need authentication
   const openUrls = [
-    'https://192.168.88.148:5000/api/login',
-    'https://192.168.88.148:5000/api/reg_temp_user',
-    'https://192.168.88.148:5000/api/featuredEpisodes',
-    'https://192.168.88.148:5000/api/episodes',
-
+    '/api/login',
+    '/api/reg_temp_user',
+    '/api/featuredEpisodes',
+    '/api/episodes',
   ];
 
   const fetchData = async ({method, endpoint, headers, body,}: FetchOptions): Promise<any> => {

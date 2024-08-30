@@ -18,7 +18,7 @@ const LeaderBoard: React.FC = () => {
 
   
     const loadLeaderBoard = async() => {
-        const leaderBoardEndpoint = 'https://192.168.88.148:5000/api/leaderboard';
+        const leaderBoardEndpoint = '/api/leaderboard';
 
         try {
             const data = await fetchData({
@@ -51,10 +51,10 @@ const LeaderBoard: React.FC = () => {
             <div className='col-md-6'>
               <div className='row justify-content-center'>
                 <div className="col-md-8 username">
-                  <h3 className=''>Username: <span>{username}</span></h3>
+                  <h3 className=''>Username: <span> <p>{username}</p> </span></h3>
                 </div>
                 <div className="col-md-6 user-score">
-                  <h3 className=''>Score: <span>{score}</span></h3>
+                  <h3 className=''>Score: <span> <p>{score}</p> </span></h3>
                 </div>
               </div>
             </div>

@@ -15,7 +15,6 @@ const EndOfTrivia: React.FC<EndOfTriviaProps> = ({episodeId, episodeScore, total
   const { episodes } = useEpisodes();
   const [nextEpisodeObject, setNextEpisodeObject] = useState<Episode | undefined>(undefined);
 
-  const allEpisodeIds = episodes.map((episode) => episode.id);
   const navigate = useNavigate();
 
   // Current episode
@@ -23,29 +22,34 @@ const EndOfTrivia: React.FC<EndOfTriviaProps> = ({episodeId, episodeScore, total
     (episode) => episode.id === episodeId
   )!;
 
-  // Removing answered episodes from the list of all episodes
-  const unAnsweredEpisodes = allEpisodeIds.filter(
-    (episode) => !answeredEpisodes.includes(episode)
-  );
-
-  const unAnsweredEpisodeObjects = episodes.filter(
-    (episode) => unAnsweredEpisodes.includes(episode.id)
-  );
-
   useEffect(() => {
+    const allEpisodeIds = episodes.map((episode) => episode.id);
+    
+    // Removing answered episodes from the list of all episodes
+    const unAnsweredEpisodes = allEpisodeIds.filter(
+      (episode) => !answeredEpisodes.includes(episode)
+    );
+
+    const unAnsweredEpisodeObjects = episodes.filter(
+      (episode) => unAnsweredEpisodes.includes(episode.id)
+    );
+
     // Set next episode only if there are unanswered episodes left
     if (unAnsweredEpisodeObjects.length > 0) {
       const next = unAnsweredEpisodeObjects.pop();
       setNextEpisodeObject(next);
     }
-  }, [unAnsweredEpisodes]);
+  }, [answeredEpisodes]);
 
-  const nextTrivia = () => {
+  const nextTrivia = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
     if(nextEpisodeObject) {
-    navigate(`/user/trivia/${nextEpisodeObject.id}/${nextEpisodeObject.episode_no}`);
+        navigate(`/user/trivia/${nextEpisodeObject.id}/${nextEpisodeObject.episode_no}`);
+        // window.location.reload(); // Reload the page after navigation
+    } else {
+        navigate('/scores');
     }
   };
-
 
   return (
     <div className="row justify-content-center">
@@ -62,9 +66,9 @@ const EndOfTrivia: React.FC<EndOfTriviaProps> = ({episodeId, episodeScore, total
             {nextEpisodeObject ? (
               <>
                 <h6 className="page-title pt-1">{nextEpisodeObject.episode_no} {nextEpisodeObject.title}</h6>
-                <a className='episode-link btn btn-primary' href='' onClick={nextTrivia}>
+                <button className='episode-link btn btn-primary' onClick={nextTrivia}>
                   Begin
-                </a>
+                </button>
               </>
             ) : (
               <p>No more episodes available</p>
@@ -76,7 +80,7 @@ const EndOfTrivia: React.FC<EndOfTriviaProps> = ({episodeId, episodeScore, total
         </div>
       </div> 
     </div>
-  )
+  );
 }
 
 export default EndOfTrivia;

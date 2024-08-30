@@ -7,7 +7,7 @@ function NoQuestions() {
         <Lottie
             loop={true} 
             animationData={swingingsad} 
-            style={{ width: 400, height: 400 }} 
+            style={{ width: 150, height: 150 }} 
           />
           <p className="text-white">No new questions for you!</p>
     </div>

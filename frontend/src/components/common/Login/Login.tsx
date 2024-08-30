@@ -40,7 +40,7 @@ function Login() {
         user,
         password,
       };
-      const loginEndpoint = "https://192.168.88.148:5000/api/login";
+      const loginEndpoint = "/api/login";
 
       const login_response = await fetchData({
         method: "POST",

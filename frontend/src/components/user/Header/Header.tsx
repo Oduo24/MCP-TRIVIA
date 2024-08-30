@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { IconContext } from 'react-icons';
 import { IoHome } from 'react-icons/io5';
 import { MdDashboardCustomize, MdLeaderboard, MdOutlineLogin, MdSwitchAccount } from 'react-icons/md';
-import { Link, Outlet, NavLink } from 'react-router-dom'
+import { Outlet, NavLink } from 'react-router-dom'
 import { Tooltip, TooltipRefProps } from 'react-tooltip';
 import { useRef } from 'react';
 import { Toaster } from 'react-hot-toast';

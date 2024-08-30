@@ -28,7 +28,7 @@ const Start: React.FC = () => {
 
     useEffect(()=>{
         const getEpisodesData = async () => {
-            const episodesEndpoint = 'https://192.168.88.148:5000/api/episodes';
+            const episodesEndpoint = '/api/episodes';
             try{
                 const episodesData = await fetchData({
                     method: 'GET',
@@ -89,7 +89,7 @@ const Start: React.FC = () => {
                 <div className="col" key={index}>
                     <Link to={`/user/trivia/${episode.id}/${episode.episode_no}`} className='episode-link'>
                         <div className="card h-100" >
-                            <img src={`https://192.168.88.148:5000/${episode.image_path}`} onLoad={handleOnLoad} className="card-img-top" alt="..." />
+                            <img src={episode.image_path} onLoad={handleOnLoad} className="card-img-top" alt="..." />
                             <div className="card-body card-body-custom text-center">
                                 <h6 className="page-title  pt-1">{episode.episode_no} {episode.title}</h6>
                             </div>

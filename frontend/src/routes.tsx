@@ -7,7 +7,7 @@ import LeaderBoard from "./components/user/LeaderBoard/LeaderBoard";
 import FirstVisit from "./components/common/FirstVisit";
 import Account from "./components/user/Account/Account";
 import Start from "./components/user/Start/Start";
-import EpisodeTrivia from "./components/user/Trivia/EpisodeTrivia"
+import EpisodeTriviaWrapper from "./components/user/Trivia/EpisodeTriviaWrapper";
 
 export const adminRoutes: RouteObject[] = [
   { path: "/admin/home", element: <AdminDashboard /> },
@@ -21,7 +21,7 @@ export const userRoutes: RouteObject[] = [
   { path: "/scores", element: <LeaderBoard /> },
   { path: "/user/account", element: <Account /> },
   { path: "/user/start", element: <Start /> },
-  { path: "/user/trivia/:episodeId/:episodeNumber", element: <EpisodeTrivia /> },
+  { path: "/user/trivia/:episodeId/:episodeNumber", element: <EpisodeTriviaWrapper /> },
 ];
 
 export const commonRoutes: RouteObject[] = [

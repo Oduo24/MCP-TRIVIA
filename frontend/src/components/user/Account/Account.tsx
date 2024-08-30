@@ -12,7 +12,7 @@ const Account = () => {
     const handleUsernameChange = async(e: React.FormEvent) => {
         e.preventDefault();
 
-        const usernameChangeEndpoint = "https://192.168.88.148:5000/api/change_username";
+        const usernameChangeEndpoint = "/api/change_username";
         try {
             const usernameChange: Success = await fetchData({
                 method: 'POST',

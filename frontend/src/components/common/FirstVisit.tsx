@@ -17,7 +17,7 @@ const FirstVisit = () => {
         navigate('/login');
       } else {
         try {
-          const tempUserEndpoint = "https://192.168.88.148:5000/api/reg_temp_user";
+          const tempUserEndpoint = "/api/reg_temp_user";
           const result = await fetchData({
             method: "GET",
             endpoint: tempUserEndpoint,
