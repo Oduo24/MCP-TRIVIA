@@ -69,6 +69,10 @@ def role_required(*roles):
         return decorator
     return wrapper
 
+@app.route('/test', methods=['GET'], strict_slashes=False)
+def test():
+    """Test route"""
+    return jsonify(test_data='Success')
 
 @app.route('/api/reg_temp_user', methods=['GET'], strict_slashes=False)
 def create_temp_user():

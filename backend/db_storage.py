@@ -12,7 +12,7 @@ from models.main_models import User, Question, Episode, Category, UserAnsweredQu
 
 MYSQL_USER = os.environ.get('MYSQL_USER', 'gerald')
 MYSQL_PWD = os.environ.get('MYSQL_PWD', 'ruphinee')
-MYSQL_HOST = os.environ.get('MYSQL_HOST', 'localhost')
+MYSQL_HOST = os.environ.get('MYSQL_HOST', 'mcp-trivia-db-instance.c18ys0qg2qkp.af-south-1.rds.amazonaws.com')
 MYSQL_DB = os.environ.get('MYSQL_DB', 'mcp_db')
 
 engine = create_engine(
