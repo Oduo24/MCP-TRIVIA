@@ -105,7 +105,7 @@ const EpisodeTrivia: React.FC<EpisodeTriviaProps> = ({episodeID}) => {
 
       if (data.score - score === 3) {
         setIsCelebrating(true);
-        const message = '3/3, you really are a chequemate';
+        const message = '3/3';
         const icon = '🥳';
         notify(message, icon);
       } else if (data.score - score === 0) {

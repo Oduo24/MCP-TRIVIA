@@ -21,7 +21,7 @@ const Header: React.FC<HeaderProps> = ({isAuthenticated, role, username}) => {
     if (username?.startsWith('user_')) {
       accountTooltipRef.current?.open({
         anchorSelect: '.account',
-        content: 'Change your username here',
+        content: 'Change username',
       })
     }
   }, [username])
@@ -30,8 +30,8 @@ const Header: React.FC<HeaderProps> = ({isAuthenticated, role, username}) => {
   return (
     <>
     <IconContext.Provider value={{ color: "yellow", className: "global-class-name" }}>
-    <div className="row flex-fill justify-content-center">
-      <div className="col-md-8 mt-5">
+    <div className="row flex-fill justify-content-center pb-4 pt-3">
+      <div className="col-md-8">
         <Toaster/>
         <nav className="d-flex justify-content-center">
           <ul className="nav">
@@ -60,7 +60,7 @@ const Header: React.FC<HeaderProps> = ({isAuthenticated, role, username}) => {
                   <NavLink className="nav-link text-white account" to="/user/account">
                     <MdSwitchAccount /> Account
                   </NavLink>
-                  <Tooltip ref={accountTooltipRef} place='bottom' style={{ backgroundColor: "rgb(185, 182, 182)", color: "#222" }}/>
+                  <Tooltip ref={accountTooltipRef} place='top' style={{ backgroundColor: "rgb(185, 182, 182)", color: "#222" }}/>
                 </li>
               </>
             )}
