@@ -10,9 +10,9 @@ from models.base_model import Base
 from models.main_models import User, Question, Episode, Category, UserAnsweredQuestion, user_answered_episodes
 
 
-MYSQL_USER = os.environ.get('MYSQL_USER', 'gerald')
-MYSQL_PWD = os.environ.get('MYSQL_PWD', 'ruphinee')
-MYSQL_HOST = os.environ.get('MYSQL_HOST', 'mcp-trivia-db-instance.c18ys0qg2qkp.af-south-1.rds.amazonaws.com')
+MYSQL_USER = os.environ.get('MYSQL_USER', '')
+MYSQL_PWD = os.environ.get('MYSQL_PWD', '')
+MYSQL_HOST = os.environ.get('MYSQL_HOST', '')
 MYSQL_DB = os.environ.get('MYSQL_DB', 'mcp_db')
 
 engine = create_engine(

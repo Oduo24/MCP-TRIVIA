@@ -1,7 +1,7 @@
 """Main applicaion module that defines routes"""
 import os
 import traceback
-from flask import Flask, request, jsonify, make_response, redirect, url_for
+from flask import Flask, request, jsonify, make_response, redirect, url_for, render_template
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt, get_jwt_identity, verify_jwt_in_request, set_access_cookies, unset_jwt_cookies
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -25,7 +25,7 @@ from utility import allowed_file
 
 app = Flask(__name__)
 jwt = JWTManager(app)
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": "https://192.168.88.148:5173"}})  # Enable CORS for all routes
+CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": ["https://d3po3a2nipx8k2.cloudfront.net", "http://d3po3a2nipx8k2.cloudfront.net"]}})  # Enable CORS for all routes
 
 # Configure upload folder
 UPLOAD_FOLDER = 'static/uploads'
@@ -449,7 +449,14 @@ def featuredEpisodes():
     except Exception as e:
         traceback.print_exc()
         return jsonify(error='Unable to retrieve top featured episodes')
+    
+# Define general route if the browser sends a request to the server and the request is not handled by react router
+# Return the index.html file this will give back the request to react router to handle.
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, ssl_context=('192.168.88.148.pem', '192.168.88.148-key.pem'), debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
