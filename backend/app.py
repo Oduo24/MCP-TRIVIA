@@ -32,7 +32,7 @@ UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # app.secret_key = '1234567890op[kljhtresdfjkl.,mn]'
-app.config["JWT_SECRET_KEY"] = 'os.urandom(32)'
+app.config["JWT_SECRET_KEY"] = os.environ.get('JWT_SECRET_KEY', '234567890oijhgfdzxcvbnmliuytyuytdsd')
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']  # Instruct Flask-JWT-Extended to read tokens from cookies
 app.config['JWT_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
 app.config['JWT_COOKIE_CSRF_PROTECT'] = False
