@@ -1,4 +1,8 @@
 # MCP-TRIVIA
+
+### **AWS Architecture Diagram**
+![Architecture Diagram](./infrastructure/mcp_trivia_architecture.drawio.png)
+
 ### **Architecture Overview**
 
 1. **Frontend (React Application)**
@@ -13,5 +17,6 @@
    - **Database**: A MySQL database is used to store data.
    - **Connectivity**: The Flask backend interacts with the MySQL database to perform CRUD operations (Create, Read, Update, Delete).
 
-### **Infrastructure Diagram**
+
+
 
